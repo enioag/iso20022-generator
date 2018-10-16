@@ -3,13 +3,15 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>iso20022_generator</RootNamespace>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Company>enio AG</Company>
     <Authors>Marco Birchler, Thomas Kohler</Authors>
     <PackageProjectUrl>https://github.com/enioag/iso20022-generator</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/enioag/iso20022-generator/blob/master/LICENSE</PackageLicenseUrl>
     <PackageId>iso20022Generator</PackageId>
     <Product>iso20022Generator</Product>
+    <Version>1.0.1</Version>
+    <Copyright>enio AG</Copyright>
   </PropertyGroup>
 
 </Project>
