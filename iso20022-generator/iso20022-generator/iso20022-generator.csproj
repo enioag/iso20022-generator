@@ -10,8 +10,9 @@
     <PackageLicenseUrl>https://github.com/enioag/iso20022-generator/blob/master/LICENSE</PackageLicenseUrl>
     <PackageId>iso20022Generator</PackageId>
     <Product>iso20022Generator</Product>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Copyright>enio AG</Copyright>
+    <Description>This generator library helps you building iso 20022 artifacts with the minimum amount of information you need to set up valid documents. Currently pain.001 files are only supported.</Description>
   </PropertyGroup>
 
 </Project>
