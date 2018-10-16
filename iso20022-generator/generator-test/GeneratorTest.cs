@@ -52,8 +52,7 @@ namespace generator_test
                     ReferenceIdentification = "Reference Id for Receiver"
                 });
 
-            generator.SavePain001ToDirectory(@"c:\temp\pain001.xml");
-
+            generator.GetPain001String();
             Assert.True(true);
         }
     }
