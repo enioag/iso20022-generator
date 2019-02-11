@@ -107,8 +107,14 @@ namespace iso20022_generator
             PostalAddress6CH pstlAdr = new PostalAddress6CH(); // Index 2.79 / Postal Address
             cdtr.PstlAdr = pstlAdr;
 
+            
             pstlAdr.StrtNm = receiver.StreetName; // Index 2.79 / Street Name
-            pstlAdr.StrtNm = receiver.StreetNumber; // Index 2.79 / Building Number
+
+            if (!string.IsNullOrWhiteSpace(receiver.StreetNumber))
+            {
+                pstlAdr.StrtNm = receiver.StreetName + " " + receiver.StreetNumber; // Index 2.79 / Building Number
+            }
+
             pstlAdr.PstCd = receiver.Zip; // Index 2.79 / Post Code
             pstlAdr.TwnNm = receiver.City; // Index 2.79 / Town Name
             pstlAdr.Ctry = receiver.CountryCode; // Index 2.79 / Country
