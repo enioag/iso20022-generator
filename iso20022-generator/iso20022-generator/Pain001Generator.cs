@@ -41,7 +41,7 @@ namespace iso20022_generator
             initPty.Nm = init.SenderPartyName; // Index 1.8 - Name
             initPty.CtctDtls = ctctDtls; // Index 1.8 - Contact Details
             ctctDtls.Nm = "iso20022-Generator"; // Index 1.8 - Contact Details.Name
-            ctctDtls.Othr = "1.0.0"; // Index 1.8 - Contact Details.Other
+            ctctDtls.Othr = "1.3.0"; // Index 1.8 - Contact Details.Other
 
 
             // Level B
@@ -92,7 +92,7 @@ namespace iso20022_generator
             ActiveOrHistoricCurrencyAndAmount currencyAndAmount = new ActiveOrHistoricCurrencyAndAmount(); // Index 2.43
             amt.Item = currencyAndAmount;
             currencyAndAmount.Ccy = transaction.CurrencyCode;
-            currencyAndAmount.Value = 100;
+            currencyAndAmount.Value = transaction.Amount;
 
             BranchAndFinancialInstitutionIdentification4CH cdtrAgt = new BranchAndFinancialInstitutionIdentification4CH(); // Index 2.77
             cdtTrfTxInf.CdtrAgt = cdtrAgt;
