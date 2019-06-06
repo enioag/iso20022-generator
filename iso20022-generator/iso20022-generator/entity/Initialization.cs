@@ -6,6 +6,8 @@ namespace iso20022_generator.entity
     {
         private string _senderIban;
         private DateTime _executionDate;
+        private string _senderBic = "";
+
         public string SenderPartyName { get; set; }
 
         public string SenderIban
@@ -21,12 +23,23 @@ namespace iso20022_generator.entity
             }
         }
 
+        public string SenderBic
+        {
+            get => _senderBic;
+            set
+            {
+                if (value.Length > 11)
+                    throw new ArgumentException("Sender BIC is to long", nameof(value));
+                _senderBic = value;
+            }
+        }
+
         public DateTime ExecutionDate
         {
             get => _executionDate;
             set
             {
-                if(value.Date < DateTime.Now.Date)
+                if (value.Date < DateTime.Now.Date)
                     throw new ArgumentException("ExecutionDate cannot be in the past");
                 _executionDate = value;
             }

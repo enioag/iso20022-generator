@@ -62,7 +62,14 @@ namespace iso20022_generator
             dbtrAcctId.Item = init.SenderIban; // Index 2.20 / Id / IBAN  Bezugs-Konto
 
             pmtInf1.DbtrAgt = dbtrAgt;
+
+            // Add BIC only if is set to garantee the compatibility to the old version
+            if (!string.IsNullOrEmpty(init.SenderBic))
+                finInstnIdDbtr.BIC = init.SenderBic;
+
             dbtrAgt.FinInstnId = finInstnIdDbtr;
+
+            
 
             // Level C
             pmtInf1.CdtTrfTxInf = new CreditTransferTransactionInformation10CH[0]; // Index 2.27
