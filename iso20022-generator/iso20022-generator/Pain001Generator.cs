@@ -2,8 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Xml;
 using System.Xml.Serialization;
 using iso20022_generator.entity;
+using iso20022_generator.entity.Transactions;
 
 namespace iso20022_generator
 {
@@ -63,17 +67,16 @@ namespace iso20022_generator
 
             pmtInf1.DbtrAgt = dbtrAgt;
 
-            // Add BIC only if is set to garantee the compatibility to the old version
-            if (!string.IsNullOrEmpty(init.SenderBic))
+            // Add BIC only if is set to guarantee the compatibility to the old version
+            if (!string.IsNullOrEmpty(init.SenderBic)) // Index 2.21
                 finInstnIdDbtr.BIC = init.SenderBic;
 
             dbtrAgt.FinInstnId = finInstnIdDbtr;
 
-            
+
 
             // Level C
             pmtInf1.CdtTrfTxInf = new CreditTransferTransactionInformation10CH[0]; // Index 2.27
-            
         }
 
         /// <summary>
@@ -81,7 +84,7 @@ namespace iso20022_generator
         /// </summary>
         /// <param name="receiver">Object with all the required information about the receiver of the new transaction</param>
         /// <param name="transaction">Object with all the required information about the transaction itself</param>
-        public void AddTransaction(Receiver receiver, Transaction transaction)
+        public void AddTransaction(Receiver receiver, TransactionBase transaction)
         {
             CreditTransferTransactionInformation10CH cdtTrfTxInf = new CreditTransferTransactionInformation10CH(); // Index 2.27
 
@@ -89,9 +92,6 @@ namespace iso20022_generator
             cdtTrfTxInf.PmtId = pmtId;
             pmtId.InstrId = "1-" + pmtInf1.CdtTrfTxInf.Length; // Index 2.29
             pmtId.EndToEndId = transaction.ReferenceIdentification; // Index 2.30
-
-            PaymentTypeInformation19CH pmtTpInf = new PaymentTypeInformation19CH(); // Index 2.31
-            cdtTrfTxInf.PmtTpInf = pmtTpInf;
 
             AmountType3Choice amt = new AmountType3Choice(); // Index 2.42
             cdtTrfTxInf.Amt = amt;
@@ -101,15 +101,9 @@ namespace iso20022_generator
             currencyAndAmount.Ccy = transaction.CurrencyCode;
             currencyAndAmount.Value = transaction.Amount;
 
-            BranchAndFinancialInstitutionIdentification4CH cdtrAgt = new BranchAndFinancialInstitutionIdentification4CH(); // Index 2.77
-            cdtTrfTxInf.CdtrAgt = cdtrAgt;
-
-            FinancialInstitutionIdentification7CH finInstnIdCdtr = new FinancialInstitutionIdentification7CH(); // Index 2.77 / Financial Institution Identification
-            cdtrAgt.FinInstnId = finInstnIdCdtr;        
-
             PartyIdentification32CH_Name cdtr = new PartyIdentification32CH_Name(); // Index 2.79
             cdtTrfTxInf.Cdtr = cdtr;
-            
+
             cdtr.Nm = receiver.Name; // Index 2.79 / Name
             PostalAddress6CH pstlAdr = new PostalAddress6CH(); // Index 2.79 / Postal Address
             cdtr.PstlAdr = pstlAdr;
@@ -127,10 +121,75 @@ namespace iso20022_generator
             pstlAdr.Ctry = receiver.CountryCode; // Index 2.79 / Country
 
             CashAccount16CH_Id cdtrAcct = new CashAccount16CH_Id(); // Index 2.80
+            cdtrAcct.Id = new AccountIdentification4ChoiceCH(); // Index 2.80 / Identification
             cdtTrfTxInf.CdtrAcct = cdtrAcct;
 
-            cdtrAcct.Id = new AccountIdentification4ChoiceCH(); // Index 2.80 / Identification
-            cdtrAcct.Id.Item = transaction.ReceiverIban; // Index 2.80 / Id / IBAN  Ziel-Konto
+            if (transaction.GetType() == typeof(TransactionIBAN))
+            {
+                TransactionIBAN transactionIBAN = ((TransactionIBAN) transaction);
+
+                cdtrAcct.Id.Item = transactionIBAN.ReceiverIban; // Index 2.80 / Id / IBAN  Ziel-Konto
+
+                if (!string.IsNullOrWhiteSpace(transactionIBAN.ReceiverBIC))
+                {
+                    BranchAndFinancialInstitutionIdentification4CH cdtrAgt = new BranchAndFinancialInstitutionIdentification4CH(); // Index 2.77
+                    cdtTrfTxInf.CdtrAgt = cdtrAgt;
+
+                    FinancialInstitutionIdentification7CH finInstnIdCdtr = new FinancialInstitutionIdentification7CH(); // Index 2.77 / Financial Institution Identification
+                    cdtrAgt.FinInstnId = finInstnIdCdtr;
+                    finInstnIdCdtr.BIC = transactionIBAN.ReceiverBIC; // Index 2.21
+                }
+            }
+            else if (transaction.GetType() == typeof(TransactionESR))
+            {
+                TransactionESR transactionESR = ((TransactionESR) transaction);
+
+                PaymentTypeInformation19CH pmtTpInf = new PaymentTypeInformation19CH(); // Index 2.31
+                cdtTrfTxInf.PmtTpInf = pmtTpInf;
+                cdtTrfTxInf.PmtTpInf = new PaymentTypeInformation19CH // Index 2.31
+                {
+                    LclInstrm = new LocalInstrument2Choice // Index 2.36
+                    {
+                        ItemElementName = ItemChoiceType5.Prtry, // Index 2.38
+                        Item = transactionESR.PaymentType
+                    }
+                }; 
+
+                cdtrAcct.Id.Item = new GenericAccountIdentification1CH() // Index 2.80
+                {
+                    Id = transactionESR.ReceiverAccount
+                };
+
+                var rmtInf = new RemittanceInformation5CH(); // Index 2.98
+                cdtTrfTxInf.RmtInf = rmtInf;
+                rmtInf.Strd = new StructuredRemittanceInformation7
+                {
+                    CdtrRefInf = new CreditorReferenceInformation2
+                    {
+                        Ref = transactionESR.ESRReferenceNumber
+                    }
+                };
+            }
+            else if (transaction.GetType() == typeof(TransactionES))
+            {
+                TransactionES transactionES = ((TransactionES)transaction);
+
+                PaymentTypeInformation19CH pmtTpInf = new PaymentTypeInformation19CH(); // Index 2.31
+                cdtTrfTxInf.PmtTpInf = pmtTpInf;
+                cdtTrfTxInf.PmtTpInf = new PaymentTypeInformation19CH // Index 2.31
+                {
+                    LclInstrm = new LocalInstrument2Choice // Index 2.36
+                    {
+                        ItemElementName = ItemChoiceType5.Prtry, // Index 2.38
+                        Item = transactionES.PaymentType
+                    }
+                };
+
+                cdtrAcct.Id.Item = new GenericAccountIdentification1CH() // Index 2.80
+                {
+                    Id = transactionES.ReceiverAccount
+                };
+            }
 
             AddNewCreditTransferTransactionInformation(pmtInf1.CdtTrfTxInf, cdtTrfTxInf);
             UpdateLevelA();
@@ -167,11 +226,14 @@ namespace iso20022_generator
         /// <returns></returns>
         public string GetPain001String()
         {
-            using (StringWriter sw = new StringWriter())
-            {
-                new XmlSerializer(typeof(Document)).Serialize(sw, doc);
-                return sw.ToString();
-            }
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(Document));
+            MemoryStream memStrm = new MemoryStream();
+            UTF8Encoding utf8e = new UTF8Encoding();
+            XmlTextWriter xmlSink = new XmlTextWriter(memStrm, utf8e);
+
+            xmlSerializer.Serialize(xmlSink, doc);
+            byte[] utf8EncodedData = memStrm.ToArray();
+            return utf8e.GetString(utf8EncodedData).Replace("encoding=\"utf-8\"", "encoding=\"UTF-8\"");
         }
 
         /// <summary>
