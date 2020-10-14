@@ -34,17 +34,6 @@ namespace iso20022_generator.entity
             }
         }
 
-        public DateTime ExecutionDate
-        {
-            get => _executionDate;
-            set
-            {
-                if (value.Date < DateTime.Now.Date)
-                    throw new ArgumentException("ExecutionDate cannot be in the past");
-                _executionDate = value;
-            }
-        }
-
         /// <summary>
         /// This must be a unique string identifier over all sent pain.001 files over the last 90 days.
         /// Your financial institute will use that id for duplicate checking. The id must not be longer than 34 characters

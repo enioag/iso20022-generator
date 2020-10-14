@@ -14,14 +14,15 @@ namespace generator_test
             var generator = new Pain001Generator(new Initialization()
             {
                 UniqueDocumentId = Guid.NewGuid().ToString().Substring(0, 34),  // Must be unique for the bank within 90 days
-                ExecutionDate = DateTime.Now.AddDays(3),
                 SenderPartyName = "enio AG",
                 SenderIban = "CH90 8136 1000 0338 6282 8",
                 SenderBic = "CRESCHZZ80A" //CS
                 // SenderBic = "ZKBKCHZZ80A" //ZKB
             });
 
-            generator.AddTransaction(new Receiver
+            var p1 = generator.AddPaymentInfo(DateTime.Now.AddDays(10));
+
+            generator.AddTransaction(p1, new Receiver
                 {
                     Name = "Max Kälin",
                     StreetName = "Dorfstrasse",
@@ -36,10 +37,11 @@ namespace generator_test
                     Amount = 100,
                     ReceiverIban = "CH26 0840 1016 9700 6070 6",
                     ReferenceIdentification = "Reference Id for Receiver",
-                    ReceiverBIC = "MIGRCHZZXXX"
+                    //ReceiverBIC = "MIGRCHZZXXX"
                 });
 
-            generator.AddTransaction(new Receiver
+            var p2 = generator.AddPaymentInfo(DateTime.Now.AddDays(5));
+            generator.AddTransaction(p2, new Receiver
             {
                 Name = "Marco Birchler",
                 StreetName = "Hauptstrasse",
@@ -56,7 +58,7 @@ namespace generator_test
                 ReferenceIdentification = "Reference Id for Receiver"
             });
 
-            generator.AddTransaction(new Receiver
+            generator.AddTransaction(p2, new Receiver
                 {
                     Name = "Strassenverkehrs- und Schifffahrtsamt",
                     StreetName = "Strasse",
@@ -73,8 +75,9 @@ namespace generator_test
                     ReferenceIdentification = "Reference Id for Receiver",
                     ESRReferenceNumber = "80 00102 32416 20202 00126 57394"
                 });
-
-            generator.AddTransaction(new Receiver
+            
+            var p3 = generator.AddPaymentInfo(DateTime.Now.AddDays(2));
+            generator.AddTransaction(p3, new Receiver
                 {
                     Name = "Alpkorporation Kohlschlag",
                     StreetName = "Kohlschlagerstrasse 2",

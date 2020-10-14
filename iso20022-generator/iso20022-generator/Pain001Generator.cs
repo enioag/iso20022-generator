@@ -17,12 +17,16 @@ namespace iso20022_generator
         private GroupHeader32CH grpHdr = new GroupHeader32CH(); // Index 1.0
         private PartyIdentification32CH_NameAndId initPty = new PartyIdentification32CH_NameAndId(); // Index 1.8
         private ContactDetails2CH ctctDtls = new ContactDetails2CH(); // Index 1.8
-        private PaymentInstructionInformation3CH pmtInf1 = new PaymentInstructionInformation3CH(); // Index 2.0
         private PartyIdentification32CH dbtr = new PartyIdentification32CH(); // Index 2.19
         private CashAccount16CH_IdTpCcy dbtrAcct = new CashAccount16CH_IdTpCcy(); // Index 2.20
         private AccountIdentification4ChoiceCH dbtrAcctId = new AccountIdentification4ChoiceCH(); // Index 2.20 / Id
         private BranchAndFinancialInstitutionIdentification4CH_BicOrClrId dbtrAgt = new BranchAndFinancialInstitutionIdentification4CH_BicOrClrId(); // Index 2.21
         private FinancialInstitutionIdentification7CH_BicOrClrId finInstnIdDbtr = new FinancialInstitutionIdentification7CH_BicOrClrId(); // Index 2.21 / Financial Institution Identification
+
+        private List<PaymentInstructionInformation3CH> pmtInfList  = new List<PaymentInstructionInformation3CH>(); // Index 2.0
+
+        private CustomerCreditTransferInitiationV03CH cstmrCdtTrfInitn = new CustomerCreditTransferInitiationV03CH();
+        private Initialization initialization;
 
         /// <summary>
         /// Initializes a new generator which allows creating ISO20022-pain.001 files.
@@ -30,7 +34,7 @@ namespace iso20022_generator
         /// <param name="init">Object with all the required information for setting up a new transaction document.</param>
         public Pain001Generator(Initialization init)
         {
-            CustomerCreditTransferInitiationV03CH cstmrCdtTrfInitn = new CustomerCreditTransferInitiationV03CH();
+            initialization = init;
             doc.CstmrCdtTrfInitn = cstmrCdtTrfInitn;
 
             // Level A
@@ -46,37 +50,44 @@ namespace iso20022_generator
             initPty.CtctDtls = ctctDtls; // Index 1.8 - Contact Details
             ctctDtls.Nm = "iso20022-Generator"; // Index 1.8 - Contact Details.Name
             ctctDtls.Othr = "1.3.0"; // Index 1.8 - Contact Details.Other
+        }
 
+        public PaymentInstructionInformation3CH AddPaymentInfo(DateTime requiredExecutionDate)
+        {
+            if (requiredExecutionDate.Date < DateTime.Now.Date)
+                throw new ArgumentException("ExecutionDate cannot be in the past");
 
             // Level B
-            cstmrCdtTrfInitn.PmtInf = new PaymentInstructionInformation3CH[1];
-            cstmrCdtTrfInitn.PmtInf[0] = pmtInf1;
+            PaymentInstructionInformation3CH pmtInf = new PaymentInstructionInformation3CH();
 
-            pmtInf1.PmtInfId = "PmtInfId-1"; // Index 2.1
-            pmtInf1.PmtMtd = PaymentMethod3Code.TRA; // Index 2.2
-            pmtInf1.BtchBookg = true; // Index 2.3
+            pmtInf.PmtInfId = $"PmtInfId-{pmtInfList.Count + 1}"; // Index 2.1
+            pmtInf.PmtMtd = PaymentMethod3Code.TRA; // Index 2.2
+            pmtInf.BtchBookg = true; // Index 2.3
 
-            pmtInf1.ReqdExctnDt = init.ExecutionDate; // Index 2.17
-            pmtInf1.Dbtr = dbtr;
+            pmtInf.ReqdExctnDt = requiredExecutionDate; // Index 2.17
+            pmtInf.Dbtr = dbtr;
 
-            dbtr.Nm = init.SenderPartyName;
+            dbtr.Nm = initialization.SenderPartyName;
 
-            pmtInf1.DbtrAcct = dbtrAcct;
+            pmtInf.DbtrAcct = dbtrAcct;
             dbtrAcct.Id = dbtrAcctId;
-            dbtrAcctId.Item = init.SenderIban; // Index 2.20 / Id / IBAN  Bezugs-Konto
+            dbtrAcctId.Item = initialization.SenderIban; // Index 2.20 / Id / IBAN  Bezugs-Konto
 
-            pmtInf1.DbtrAgt = dbtrAgt;
+            pmtInf.DbtrAgt = dbtrAgt;
 
             // Add BIC only if is set to guarantee the compatibility to the old version
-            if (!string.IsNullOrEmpty(init.SenderBic)) // Index 2.21
-                finInstnIdDbtr.BIC = init.SenderBic;
+            if (!string.IsNullOrEmpty(initialization.SenderBic)) // Index 2.21
+                finInstnIdDbtr.BIC = initialization.SenderBic;
 
             dbtrAgt.FinInstnId = finInstnIdDbtr;
 
 
-
             // Level C
-            pmtInf1.CdtTrfTxInf = new CreditTransferTransactionInformation10CH[0]; // Index 2.27
+            pmtInf.CdtTrfTxInf = new CreditTransferTransactionInformation10CH[0]; // Index 2.27
+
+            pmtInfList.Add(pmtInf);
+
+            return pmtInf;
         }
 
         /// <summary>
@@ -84,13 +95,13 @@ namespace iso20022_generator
         /// </summary>
         /// <param name="receiver">Object with all the required information about the receiver of the new transaction</param>
         /// <param name="transaction">Object with all the required information about the transaction itself</param>
-        public void AddTransaction(Receiver receiver, TransactionBase transaction)
+        public void AddTransaction(PaymentInstructionInformation3CH pmtInf, Receiver receiver, TransactionBase transaction)
         {
             CreditTransferTransactionInformation10CH cdtTrfTxInf = new CreditTransferTransactionInformation10CH(); // Index 2.27
 
             PaymentIdentification1 pmtId = new PaymentIdentification1(); // Index 2.28
             cdtTrfTxInf.PmtId = pmtId;
-            pmtId.InstrId = "1-" + pmtInf1.CdtTrfTxInf.Length; // Index 2.29
+            pmtId.InstrId = "1-" + pmtInf.CdtTrfTxInf.Length; // Index 2.29
             pmtId.EndToEndId = transaction.ReferenceIdentification; // Index 2.30
 
             AmountType3Choice amt = new AmountType3Choice(); // Index 2.42
@@ -191,21 +202,27 @@ namespace iso20022_generator
                 };
             }
 
-            AddNewCreditTransferTransactionInformation(pmtInf1.CdtTrfTxInf, cdtTrfTxInf);
-            UpdateLevelA();
+            AddNewCreditTransferTransactionInformation(pmtInf, cdtTrfTxInf);
         }
 
-        private void AddNewCreditTransferTransactionInformation(
-            CreditTransferTransactionInformation10CH[] arrayToExtend, CreditTransferTransactionInformation10CH cdtTrfTxInf)
+        private void AddNewCreditTransferTransactionInformation(PaymentInstructionInformation3CH pmtInf, CreditTransferTransactionInformation10CH cdtTrfTxInf)
         {
-            Array.Resize(ref arrayToExtend, arrayToExtend.Length + 1);
-            arrayToExtend[arrayToExtend.Length - 1] = cdtTrfTxInf;
-            pmtInf1.CdtTrfTxInf = arrayToExtend;
+            var pmtInfCdtTrfTxInf = pmtInf.CdtTrfTxInf;
+            Array.Resize(ref pmtInfCdtTrfTxInf, pmtInfCdtTrfTxInf.Length + 1);
+            pmtInfCdtTrfTxInf[pmtInfCdtTrfTxInf.Length - 1] = cdtTrfTxInf;
+            pmtInf.CdtTrfTxInf = pmtInfCdtTrfTxInf;
         }
 
         private void UpdateLevelA()
         {
-            grpHdr.NbOfTxs = pmtInf1.CdtTrfTxInf.Length.ToString(); // Index 1.6
+            int total = 0;
+            cstmrCdtTrfInitn.PmtInf = pmtInfList.ToArray();
+            pmtInfList.ForEach(p =>
+            {
+                total = total + p.CdtTrfTxInf.Length;
+            });
+
+            grpHdr.NbOfTxs = total.ToString(); // Index 1.6
         }
 
         /// <summary>
@@ -226,6 +243,12 @@ namespace iso20022_generator
         /// <returns></returns>
         public string GetPain001String()
         {
+            if (pmtInfList.Count == 0)
+            {
+                throw new Exception("At least one Paymentinformation must be added. Use AddPaymentInfo method.");
+            }
+
+            UpdateLevelA();
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(Document));
             MemoryStream memStrm = new MemoryStream();
             UTF8Encoding utf8e = new UTF8Encoding();
