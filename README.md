@@ -5,6 +5,7 @@ The iso20022-generator is a c# library which helps you generating iso 20022 arti
   - Currently the creation of pain.001 files is the only thing the library can do.
   - The file can contain multiple transactions to different receivers. 
   - You can add multiple payment information records with multiple transactions each. Each with its different execution date.
+  - Swiss QR with reference number (QRR). Use IBANandQRR transaction type and set QRReferenceNumber property.
 
 ##### Limitations:  
   - Although the iso20022 is a standard definition it looks as there are a lot of excess to this standard in the world. The library was mainly built for communication with swiss banks. To be precise the library was successfully tested against the test environments from the following banks: Raiffeisen Bank Schweiz, Credit Suisse, UBS and Zürcher Kantonalbank
