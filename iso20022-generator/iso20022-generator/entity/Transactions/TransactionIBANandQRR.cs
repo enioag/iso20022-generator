@@ -2,9 +2,10 @@
 
 namespace iso20022_generator.entity.Transactions
 {
-    public class TransactionIBAN : TransactionBase
+    public class TransactionIBANandQRR : TransactionBase
     {
         private string _receiverIban;
+        private string _qRRReferenceNumber;
 
         public string ReceiverIban
         {
@@ -22,5 +23,11 @@ namespace iso20022_generator.entity.Transactions
         public string ReceiverBIC { get; set; }
 
         public override string PaymentType => "";
+
+        public string QRReferenceNumber
+        {
+            get => _qRRReferenceNumber;
+            set => _qRRReferenceNumber = value.Replace(" ", "");
+        }
     }
 }

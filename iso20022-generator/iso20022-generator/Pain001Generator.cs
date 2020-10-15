@@ -135,20 +135,41 @@ namespace iso20022_generator
             cdtrAcct.Id = new AccountIdentification4ChoiceCH(); // Index 2.80 / Identification
             cdtTrfTxInf.CdtrAcct = cdtrAcct;
 
-            if (transaction.GetType() == typeof(TransactionIBAN))
+            if (transaction.GetType() == typeof(TransactionIBANandQRR))
             {
-                TransactionIBAN transactionIBAN = ((TransactionIBAN) transaction);
+                TransactionIBANandQRR transactionIbaNandQrr = ((TransactionIBANandQRR) transaction);
 
-                cdtrAcct.Id.Item = transactionIBAN.ReceiverIban; // Index 2.80 / Id / IBAN  Ziel-Konto
+                cdtrAcct.Id.Item = transactionIbaNandQrr.ReceiverIban; // Index 2.80 / Id / IBAN  Ziel-Konto
 
-                if (!string.IsNullOrWhiteSpace(transactionIBAN.ReceiverBIC))
+                if (!string.IsNullOrWhiteSpace(transactionIbaNandQrr.ReceiverBIC))
                 {
                     BranchAndFinancialInstitutionIdentification4CH cdtrAgt = new BranchAndFinancialInstitutionIdentification4CH(); // Index 2.77
                     cdtTrfTxInf.CdtrAgt = cdtrAgt;
 
                     FinancialInstitutionIdentification7CH finInstnIdCdtr = new FinancialInstitutionIdentification7CH(); // Index 2.77 / Financial Institution Identification
                     cdtrAgt.FinInstnId = finInstnIdCdtr;
-                    finInstnIdCdtr.BIC = transactionIBAN.ReceiverBIC; // Index 2.21
+                    finInstnIdCdtr.BIC = transactionIbaNandQrr.ReceiverBIC; // Index 2.21
+                }
+
+                // QRR
+                if (!string.IsNullOrWhiteSpace(transactionIbaNandQrr.QRReferenceNumber))
+                {
+                    var rmtInf = new RemittanceInformation5CH(); // Index 2.126
+                    cdtTrfTxInf.RmtInf = rmtInf;
+                    rmtInf.Strd = new StructuredRemittanceInformation7
+                    {
+                        CdtrRefInf = new CreditorReferenceInformation2
+                        {
+                            Ref = transactionIbaNandQrr.QRReferenceNumber,
+                            Tp = new CreditorReferenceType2
+                            {
+                                CdOrPrtry = new CreditorReferenceType1Choice
+                                {
+                                    Item = "QRR"
+                                }
+                            }
+                        }
+                    };
                 }
             }
             else if (transaction.GetType() == typeof(TransactionESR))

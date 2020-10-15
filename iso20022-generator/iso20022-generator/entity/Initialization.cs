@@ -5,7 +5,6 @@ namespace iso20022_generator.entity
     public class Initialization
     {
         private string _senderIban;
-        private DateTime _executionDate;
         private string _senderBic = "";
 
         public string SenderPartyName { get; set; }

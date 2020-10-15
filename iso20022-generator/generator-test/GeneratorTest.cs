@@ -31,13 +31,31 @@ namespace generator_test
                     City = "Pfäffikon",
                     CountryCode = "CH"
                 },
-                new TransactionIBAN
+                new TransactionIBANandQRR
                 {
                     CurrencyCode = "CHF",
                     Amount = 100,
                     ReceiverIban = "CH26 0840 1016 9700 6070 6",
                     ReferenceIdentification = "Reference Id for Receiver",
                     //ReceiverBIC = "MIGRCHZZXXX"
+                });
+
+            generator.AddTransaction(p1, new Receiver
+                {
+                    Name = "Alpkorporation Kohlschlag",
+                    StreetName = "Kohlschlagerstrasse",
+                    StreetNumber = "2",
+                    Zip = "8887",
+                    City = "Mels",
+                    CountryCode = "CH"
+                },
+                new TransactionIBANandQRR
+                {
+                    CurrencyCode = "CHF",
+                    Amount = 100,
+                    ReceiverIban = "CH02 3080 8007 2045 5121 8",
+                    ReferenceIdentification = "QRR Test",
+                    QRReferenceNumber = "36 63580 00000 00000 30060 03574"
                 });
 
             var p2 = generator.AddPaymentInfo(DateTime.Now.AddDays(5));
@@ -50,7 +68,7 @@ namespace generator_test
                 City = "Einsiedeln",
                 CountryCode = "CH"
             },
-            new TransactionIBAN
+            new TransactionIBANandQRR
             {
                 CurrencyCode = "CHF",
                 Amount = 100,
