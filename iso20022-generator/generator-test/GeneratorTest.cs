@@ -37,6 +37,7 @@ namespace generator_test
                     Amount = 100,
                     ReceiverIban = "CH26 0840 1016 9700 6070 6",
                     ReferenceIdentification = "Reference Id for Receiver",
+                    InstructionForDebtorAgent = "Instruction"
                     //ReceiverBIC = "MIGRCHZZXXX"
                 });
 
@@ -47,7 +48,7 @@ namespace generator_test
                     StreetNumber = "2",
                     Zip = "8887",
                     City = "Mels",
-                    CountryCode = "CH"
+                    CountryCode = "CH",
                 },
                 new TransactionIBANandQRR
                 {
@@ -55,7 +56,8 @@ namespace generator_test
                     Amount = 100,
                     ReceiverIban = "CH02 3080 8007 2045 5121 8",
                     ReferenceIdentification = "QRR Test",
-                    QRReferenceNumber = "36 63580 00000 00000 30060 03574"
+                    QRReferenceNumber = "36 63580 00000 00000 30060 03574",
+                    InstructionForDebtorAgent = "Instruction"
                 });
 
             var p2 = generator.AddPaymentInfo(DateTime.Now.AddDays(5));
@@ -73,7 +75,8 @@ namespace generator_test
                 CurrencyCode = "CHF",
                 Amount = 100,
                 ReceiverIban = "CH23 0024 5245 1002 3901 K",
-                ReferenceIdentification = "Reference Id for Receiver"
+                ReferenceIdentification = "Reference Id for Receiver",
+                InstructionForDebtorAgent = "Instruction"
             });
 
             generator.AddTransaction(p2, new Receiver
@@ -91,7 +94,8 @@ namespace generator_test
                     Amount = 100,
                     ReceiverAccount = "01-72765-4",
                     ReferenceIdentification = "Reference Id for Receiver",
-                    ESRReferenceNumber = "80 00102 32416 20202 00126 57394"
+                    ESRReferenceNumber = "80 00102 32416 20202 00126 57394",
+                    InstructionForDebtorAgent = "Instruction"
                 });
             
             var p3 = generator.AddPaymentInfo(DateTime.Now.AddDays(2));
@@ -110,6 +114,7 @@ namespace generator_test
                     Amount = 100,
                     ReceiverAccount = "70-4906-9",
                     ReferenceIdentification = "Reference Id for Receiver",
+                    InstructionForDebtorAgent = "Instruction"
                 });
 
             string ret = generator.GetPain001String();

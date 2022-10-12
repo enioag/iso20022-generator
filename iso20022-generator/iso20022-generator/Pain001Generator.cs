@@ -81,9 +81,8 @@ namespace iso20022_generator
 
             dbtrAgt.FinInstnId = finInstnIdDbtr;
 
-
             // Level C
-            pmtInf.CdtTrfTxInf = new CreditTransferTransactionInformation10CH[0]; // Index 2.27
+            pmtInf.CdtTrfTxInf = Array.Empty<CreditTransferTransactionInformation10CH>(); // Index 2.27
 
             pmtInfList.Add(pmtInf);
 
@@ -265,6 +264,8 @@ namespace iso20022_generator
                     Id = transactionES.ReceiverAccount
                 };
             }
+
+            cdtTrfTxInf.InstrForDbtrAgt = transaction.InstructionForDebtorAgent; // Index 2.85
 
             AddNewCreditTransferTransactionInformation(pmtInf, cdtTrfTxInf);
         }

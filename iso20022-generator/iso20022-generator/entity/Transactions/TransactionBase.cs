@@ -22,5 +22,7 @@ namespace iso20022_generator.entity.Transactions
         public decimal Amount { get; set; }
 
         public virtual string PaymentType => "";
+
+        public virtual string InstructionForDebtorAgent { get; set; }
     }
 }
