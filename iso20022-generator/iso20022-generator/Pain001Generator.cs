@@ -112,24 +112,30 @@ namespace iso20022_generator
             currencyAndAmount.Ccy = transaction.CurrencyCode;
             currencyAndAmount.Value = transaction.Amount;
 
-            PartyIdentification32CH_Name cdtr = new PartyIdentification32CH_Name(); // Index 2.79
-            cdtTrfTxInf.Cdtr = cdtr;
-
-            cdtr.Nm = receiver.Name; // Index 2.79 / Name
-            PostalAddress6CH pstlAdr = new PostalAddress6CH(); // Index 2.79 / Postal Address
-            cdtr.PstlAdr = pstlAdr;
-
-            
-            pstlAdr.StrtNm = receiver.StreetName; // Index 2.79 / Street Name
-
-            if (!string.IsNullOrWhiteSpace(receiver.StreetNumber))
+            if (!string.IsNullOrWhiteSpace(receiver.Name))
             {
-                pstlAdr.StrtNm = receiver.StreetName + " " + receiver.StreetNumber; // Index 2.79 / Building Number
-            }
+                PartyIdentification32CH_Name cdtr = new PartyIdentification32CH_Name(); // Index 2.79
 
-            pstlAdr.PstCd = receiver.Zip; // Index 2.79 / Post Code
-            pstlAdr.TwnNm = receiver.City; // Index 2.79 / Town Name
-            pstlAdr.Ctry = receiver.CountryCode; // Index 2.79 / Country
+                cdtTrfTxInf.Cdtr = cdtr;
+                cdtr.Nm = receiver.Name; // Index 2.79 / Name
+                if (!string.IsNullOrWhiteSpace(receiver.City))
+                {
+                    PostalAddress6CH pstlAdr = new PostalAddress6CH(); // Index 2.79 / Postal Address
+                    cdtr.PstlAdr = pstlAdr;
+
+
+                    pstlAdr.StrtNm = receiver.StreetName; // Index 2.79 / Street Name
+
+                    if (!string.IsNullOrWhiteSpace(receiver.StreetNumber))
+                    {
+                        pstlAdr.StrtNm = receiver.StreetName + " " + receiver.StreetNumber; // Index 2.79 / Building Number
+                    }
+
+                    pstlAdr.PstCd = receiver.Zip; // Index 2.79 / Post Code
+                    pstlAdr.TwnNm = receiver.City; // Index 2.79 / Town Name
+                    pstlAdr.Ctry = receiver.CountryCode; // Index 2.79 / Country
+                }
+            }
 
             CashAccount16CH_Id cdtrAcct = new CashAccount16CH_Id(); // Index 2.80
             cdtrAcct.Id = new AccountIdentification4ChoiceCH(); // Index 2.80 / Identification
@@ -166,6 +172,43 @@ namespace iso20022_generator
                                 CdOrPrtry = new CreditorReferenceType1Choice
                                 {
                                     Item = "QRR"
+                                }
+                            }
+                        }
+                    };
+                }
+            }
+            else if (transaction.GetType() == typeof(TransactionIBANandSCOR))
+            {
+                TransactionIBANandSCOR transactionIbaNandSCOR = ((TransactionIBANandSCOR)transaction);
+
+                cdtrAcct.Id.Item = transactionIbaNandSCOR.ReceiverIban; // Index 2.80 / Id / IBAN  Ziel-Konto
+
+                if (!string.IsNullOrWhiteSpace(transactionIbaNandSCOR.ReceiverBIC))
+                {
+                    BranchAndFinancialInstitutionIdentification4CH cdtrAgt = new BranchAndFinancialInstitutionIdentification4CH(); // Index 2.77
+                    cdtTrfTxInf.CdtrAgt = cdtrAgt;
+
+                    FinancialInstitutionIdentification7CH finInstnIdCdtr = new FinancialInstitutionIdentification7CH(); // Index 2.77 / Financial Institution Identification
+                    cdtrAgt.FinInstnId = finInstnIdCdtr;
+                    finInstnIdCdtr.BIC = transactionIbaNandSCOR.ReceiverBIC; // Index 2.21
+                }
+
+                // SCOR
+                if (!string.IsNullOrWhiteSpace(transactionIbaNandSCOR.StructuredCustomerReference))
+                {
+                    var rmtInf = new RemittanceInformation5CH(); // Index 2.126
+                    cdtTrfTxInf.RmtInf = rmtInf;
+                    rmtInf.Strd = new StructuredRemittanceInformation7
+                    {
+                        CdtrRefInf = new CreditorReferenceInformation2
+                        {
+                            Ref = transactionIbaNandSCOR.StructuredCustomerReference,
+                            Tp = new CreditorReferenceType2
+                            {
+                                CdOrPrtry = new CreditorReferenceType1Choice
+                                {                                     
+                                    Item = DocumentType3Code.SCOR
                                 }
                             }
                         }
