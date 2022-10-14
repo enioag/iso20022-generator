@@ -49,7 +49,7 @@ namespace iso20022_generator
             initPty.Nm = init.SenderPartyName; // Index 1.8 - Name
             initPty.CtctDtls = ctctDtls; // Index 1.8 - Contact Details
             ctctDtls.Nm = "iso20022-Generator"; // Index 1.8 - Contact Details.Name
-            ctctDtls.Othr = "1.3.0"; // Index 1.8 - Contact Details.Other
+            ctctDtls.Othr = "2.0.0"; // Index 1.8 - Contact Details.Other
         }
 
         public PaymentInstructionInformation3CH AddPaymentInfo(DateTime requiredExecutionDate)
