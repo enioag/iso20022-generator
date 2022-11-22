@@ -1,13 +1,12 @@
-﻿using iso20022_generator.schema;
+﻿using iso20022_generator.entity;
+using iso20022_generator.entity.Transactions;
+using iso20022_generator.schema;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
-using iso20022_generator.entity;
-using iso20022_generator.entity.Transactions;
 
 namespace iso20022_generator
 {
@@ -23,7 +22,7 @@ namespace iso20022_generator
         private BranchAndFinancialInstitutionIdentification4CH_BicOrClrId dbtrAgt = new BranchAndFinancialInstitutionIdentification4CH_BicOrClrId(); // Index 2.21
         private FinancialInstitutionIdentification7CH_BicOrClrId finInstnIdDbtr = new FinancialInstitutionIdentification7CH_BicOrClrId(); // Index 2.21 / Financial Institution Identification
 
-        private List<PaymentInstructionInformation3CH> pmtInfList  = new List<PaymentInstructionInformation3CH>(); // Index 2.0
+        private List<PaymentInstructionInformation3CH> pmtInfList = new List<PaymentInstructionInformation3CH>(); // Index 2.0
 
         private CustomerCreditTransferInitiationV03CH cstmrCdtTrfInitn = new CustomerCreditTransferInitiationV03CH();
         private Initialization initialization;
@@ -42,17 +41,21 @@ namespace iso20022_generator
             grpHdr.MsgId = init.UniqueDocumentId; // Index 1.1 / Required for duplication check
             grpHdr.CreDtTm = DateTime.Now; // Index 1.2
             grpHdr.NbOfTxs = "0"; // Index 1.6
-            grpHdr.CtrlSum = 0; // Index 1.7
+            grpHdr.CtrlSum = init.ControlSum; // Index 1.7
+            if (init.ControlSum > 0)
+            {
+                grpHdr.CtrlSumSpecified = true;
+            }
 
             grpHdr.InitgPty = initPty; // Index 1.8
 
             initPty.Nm = init.SenderPartyName; // Index 1.8 - Name
             initPty.CtctDtls = ctctDtls; // Index 1.8 - Contact Details
-            ctctDtls.Nm = "iso20022-Generator"; // Index 1.8 - Contact Details.Name
-            ctctDtls.Othr = "2.0.0"; // Index 1.8 - Contact Details.Other
+            ctctDtls.Nm = init.ContactDetailsName; // Index 1.8 - Contact Details.Name
+            ctctDtls.Othr = init.ContactDetailsOther; // Index 1.8 - Contact Details.Other
         }
 
-        public PaymentInstructionInformation3CH AddPaymentInfo(DateTime requiredExecutionDate)
+        public PaymentInstructionInformation3CH AddPaymentInfo(DateTime requiredExecutionDate, string paymentMethod = "TRA")
         {
             if (requiredExecutionDate.Date < DateTime.Now.Date)
                 throw new ArgumentException("ExecutionDate cannot be in the past");
@@ -61,7 +64,14 @@ namespace iso20022_generator
             PaymentInstructionInformation3CH pmtInf = new PaymentInstructionInformation3CH();
 
             pmtInf.PmtInfId = $"PmtInfId-{pmtInfList.Count + 1}"; // Index 2.1
-            pmtInf.PmtMtd = PaymentMethod3Code.TRA; // Index 2.2
+
+            PaymentMethod3Code pmtMtd;
+            if (Enum.TryParse(paymentMethod, true, out pmtMtd) == false)
+            {
+                throw new InvalidCastException($"Invalid payment method '{paymentMethod}'");
+            }
+
+            pmtInf.PmtMtd = pmtMtd; // Index 2.2
             pmtInf.BtchBookg = true; // Index 2.3
 
             pmtInf.ReqdExctnDt = requiredExecutionDate; // Index 2.17
@@ -142,7 +152,7 @@ namespace iso20022_generator
 
             if (transaction.GetType() == typeof(TransactionIBANandQRR))
             {
-                TransactionIBANandQRR transactionIbaNandQrr = ((TransactionIBANandQRR) transaction);
+                TransactionIBANandQRR transactionIbaNandQrr = ((TransactionIBANandQRR)transaction);
 
                 cdtrAcct.Id.Item = transactionIbaNandQrr.ReceiverIban; // Index 2.80 / Id / IBAN  Ziel-Konto
 
@@ -175,6 +185,20 @@ namespace iso20022_generator
                             }
                         }
                     };
+
+                    if (transactionIbaNandQrr.AdditionalRemittanceInformation.Length > 0)
+                    {
+                        rmtInf.Strd.AddtlRmtInf = transactionIbaNandQrr.AdditionalRemittanceInformation;
+                    }
+                }
+                else
+                {
+                    if (!string.IsNullOrWhiteSpace(transactionIbaNandQrr.UnstructuredRemittanceInformation))
+                    {
+                        var rmtInf = new RemittanceInformation5CH();
+                        cdtTrfTxInf.RmtInf = rmtInf;
+                        rmtInf.Ustrd = transactionIbaNandQrr.UnstructuredRemittanceInformation;
+                    }
                 }
             }
             else if (transaction.GetType() == typeof(TransactionIBANandSCOR))
@@ -206,63 +230,13 @@ namespace iso20022_generator
                             Tp = new CreditorReferenceType2
                             {
                                 CdOrPrtry = new CreditorReferenceType1Choice
-                                {                                     
+                                {
                                     Item = DocumentType3Code.SCOR
                                 }
                             }
                         }
                     };
                 }
-            }
-            else if (transaction.GetType() == typeof(TransactionESR))
-            {
-                TransactionESR transactionESR = ((TransactionESR) transaction);
-
-                PaymentTypeInformation19CH pmtTpInf = new PaymentTypeInformation19CH(); // Index 2.31
-                cdtTrfTxInf.PmtTpInf = pmtTpInf;
-                cdtTrfTxInf.PmtTpInf = new PaymentTypeInformation19CH // Index 2.31
-                {
-                    LclInstrm = new LocalInstrument2Choice // Index 2.36
-                    {
-                        ItemElementName = ItemChoiceType5.Prtry, // Index 2.38
-                        Item = transactionESR.PaymentType
-                    }
-                }; 
-
-                cdtrAcct.Id.Item = new GenericAccountIdentification1CH() // Index 2.80
-                {
-                    Id = transactionESR.ReceiverAccount
-                };
-
-                var rmtInf = new RemittanceInformation5CH(); // Index 2.98
-                cdtTrfTxInf.RmtInf = rmtInf;
-                rmtInf.Strd = new StructuredRemittanceInformation7
-                {
-                    CdtrRefInf = new CreditorReferenceInformation2
-                    {
-                        Ref = transactionESR.ESRReferenceNumber
-                    }
-                };
-            }
-            else if (transaction.GetType() == typeof(TransactionES))
-            {
-                TransactionES transactionES = ((TransactionES)transaction);
-
-                PaymentTypeInformation19CH pmtTpInf = new PaymentTypeInformation19CH(); // Index 2.31
-                cdtTrfTxInf.PmtTpInf = pmtTpInf;
-                cdtTrfTxInf.PmtTpInf = new PaymentTypeInformation19CH // Index 2.31
-                {
-                    LclInstrm = new LocalInstrument2Choice // Index 2.36
-                    {
-                        ItemElementName = ItemChoiceType5.Prtry, // Index 2.38
-                        Item = transactionES.PaymentType
-                    }
-                };
-
-                cdtrAcct.Id.Item = new GenericAccountIdentification1CH() // Index 2.80
-                {
-                    Id = transactionES.ReceiverAccount
-                };
             }
 
             cdtTrfTxInf.InstrForDbtrAgt = transaction.InstructionForDebtorAgent; // Index 2.85
@@ -281,11 +255,22 @@ namespace iso20022_generator
         private void UpdateLevelA()
         {
             int total = 0;
+            decimal sum = 0;
             cstmrCdtTrfInitn.PmtInf = pmtInfList.ToArray();
-            pmtInfList.ForEach(p =>
+            if (initialization.AutoCalculateControlSum)
             {
-                total = total + p.CdtTrfTxInf.Length;
-            });
+                pmtInfList.ForEach(p =>
+                {
+                    total = total + p.CdtTrfTxInf.Length;
+                    foreach (var amt in p.CdtTrfTxInf)
+                    {
+                        sum = sum + ((ActiveOrHistoricCurrencyAndAmount)amt.Amt.Item).Value;
+                    }
+                });
+
+                grpHdr.CtrlSum = sum; // Index 1.7
+                grpHdr.CtrlSumSpecified = true;
+            }
 
             grpHdr.NbOfTxs = total.ToString(); // Index 1.6
         }

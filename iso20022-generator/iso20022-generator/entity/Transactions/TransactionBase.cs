@@ -21,6 +21,7 @@ namespace iso20022_generator.entity.Transactions
 
         public decimal Amount { get; set; }
 
+        [Obsolete("Not used any more", true)]
         public virtual string PaymentType => "";
 
         public virtual string InstructionForDebtorAgent { get; set; }

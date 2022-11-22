@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.Text;
 
 namespace iso20022_generator.entity.Transactions
 {
+    [Obsolete("Not used any more", true)]
     public class TransactionES : TransactionBase
     {
         private string _receiverAccount;
@@ -23,6 +21,6 @@ namespace iso20022_generator.entity.Transactions
             }
         }
 
-        public override string PaymentType => "CH02";
+        //public override string PaymentType => "CH02";
     }
 }

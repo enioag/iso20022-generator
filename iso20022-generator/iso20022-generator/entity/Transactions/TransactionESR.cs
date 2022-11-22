@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.Text;
 
 namespace iso20022_generator.entity.Transactions
 {
+    [Obsolete("Not used any more", true)]
     public class TransactionESR : TransactionBase
     {
         private string _receiverAccount;
@@ -24,12 +22,13 @@ namespace iso20022_generator.entity.Transactions
             }
         }
 
-        public string ESRReferenceNumber { 
+        public string ESRReferenceNumber
+        {
             get => _ESRReferenceNumber;
 
             set => _ESRReferenceNumber = value.Replace(" ", "");
         }
 
-        public override string PaymentType => "CH01";
+        //public override string PaymentType => "CH01";
     }
 }

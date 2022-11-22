@@ -16,11 +16,14 @@ namespace generator_test
                 UniqueDocumentId = Guid.NewGuid().ToString().Substring(0, 34),  // Must be unique for the bank within 90 days
                 SenderPartyName = "enio AG",
                 SenderIban = "CH90 8136 1000 0338 6282 8",
-                SenderBic = "CRESCHZZ80A" //CS
+                SenderBic = "CRESCHZZ80A", //CS
+                ContactDetailsName = "enio AG",
+                ContactDetailsOther = "2.1.0",
+                AutoCalculateControlSum = true
                 // SenderBic = "ZKBKCHZZ80A" //ZKB
             });
 
-            var p1 = generator.AddPaymentInfo(DateTime.Now.AddDays(10));
+            var p1 = generator.AddPaymentInfo(DateTime.Now.AddDays(10), "TRA");
 
             generator.AddTransaction(p1, new Receiver
                 {
@@ -37,7 +40,8 @@ namespace generator_test
                     Amount = 100,
                     ReceiverIban = "CH26 0840 1016 9700 6070 6",
                     ReferenceIdentification = "Reference Id for Receiver",
-                    InstructionForDebtorAgent = "Instruction"
+                    InstructionForDebtorAgent = "Instruction",
+                    UnstructuredRemittanceInformation = "Invoice Number 4399"
                     //ReceiverBIC = "MIGRCHZZXXX"
                 });
 
@@ -57,17 +61,18 @@ namespace generator_test
                     ReceiverIban = "CH02 3080 8007 2045 5121 8",
                     ReferenceIdentification = "QRR Test",
                     QRReferenceNumber = "36 63580 00000 00000 30060 03574",
-                    InstructionForDebtorAgent = "Instruction"
+                    InstructionForDebtorAgent = "Instruction",
+                    AdditionalRemittanceInformation = new string[] {"Auftrag vom 25.10.2022"}
                 });
 
-            var p2 = generator.AddPaymentInfo(DateTime.Now.AddDays(5));
+            var p2 = generator.AddPaymentInfo(DateTime.Now.AddDays(5), "TRF");
             generator.AddTransaction(p2, new Receiver
             {
                 Name = "Marco Birchler",
                 StreetName = "Hauptstrasse",
                 StreetNumber = "13",
                 Zip = "8840",
-                City = "Einsiedeln",
+                City = "Einsiedelnäöü",
                 CountryCode = "CH"
             },
             new TransactionIBANandQRR
@@ -78,44 +83,6 @@ namespace generator_test
                 ReferenceIdentification = "Reference Id for Receiver",
                 InstructionForDebtorAgent = "Instruction"
             });
-
-            generator.AddTransaction(p2, new Receiver
-                {
-                    Name = "Strassenverkehrs- und Schifffahrtsamt",
-                    StreetName = "Strasse",
-                    StreetNumber = "",
-                    Zip = "9001",
-                    City = "St. Gallen",
-                    CountryCode = "CH"
-                },
-                new TransactionESR()
-                {
-                    CurrencyCode = "CHF",
-                    Amount = 100,
-                    ReceiverAccount = "01-72765-4",
-                    ReferenceIdentification = "Reference Id for Receiver",
-                    ESRReferenceNumber = "80 00102 32416 20202 00126 57394",
-                    InstructionForDebtorAgent = "Instruction"
-                });
-            
-            var p3 = generator.AddPaymentInfo(DateTime.Now.AddDays(2));
-            generator.AddTransaction(p3, new Receiver
-                {
-                    Name = "Alpkorporation Kohlschlag",
-                    StreetName = "Kohlschlagerstrasse 2",
-                    StreetNumber = "",
-                    Zip = "8887",
-                    City = "Mels",
-                    CountryCode = "CH"
-                },
-                new TransactionES()
-                {
-                    CurrencyCode = "CHF",
-                    Amount = 100,
-                    ReceiverAccount = "70-4906-9",
-                    ReferenceIdentification = "Reference Id for Receiver",
-                    InstructionForDebtorAgent = "Instruction"
-                });
 
             string ret = generator.GetPain001String();
             Assert.True(true);

@@ -22,12 +22,14 @@ namespace iso20022_generator.entity.Transactions
 
         public string ReceiverBIC { get; set; }
 
-        public override string PaymentType => "";
-
         public string QRReferenceNumber
         {
             get => _qRRReferenceNumber;
             set => _qRRReferenceNumber = value.Replace(" ", "");
         }
+
+        public string UnstructuredRemittanceInformation { get; set; }
+
+        public string[] AdditionalRemittanceInformation { get; set; }
     }
 }

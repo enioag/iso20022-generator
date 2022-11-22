@@ -6,6 +6,9 @@ namespace iso20022_generator.entity
     {
         private string _senderIban;
         private string _senderBic = "";
+        private decimal _controlSum;
+        private string _contactDetailsName = "iso20022-Generator / enio AG";
+        private string _contactDetailsOther = "2.1.0";
 
         public string SenderPartyName { get; set; }
 
@@ -30,6 +33,35 @@ namespace iso20022_generator.entity
                 if (value.Length > 11)
                     throw new ArgumentException("Sender BIC is to long", nameof(value));
                 _senderBic = value;
+            }
+        }
+
+        public decimal ControlSum
+        {
+            get => _controlSum;
+            set
+            {
+                _controlSum = value;
+            }
+        }
+
+        public bool AutoCalculateControlSum { get; set; }
+
+        public string ContactDetailsName
+        {
+            get => _contactDetailsName;
+            set
+            {
+                _contactDetailsName = value;
+            }
+        }
+
+        public string ContactDetailsOther
+        {
+            get => _contactDetailsOther;
+            set
+            {
+                _contactDetailsOther = value;
             }
         }
 

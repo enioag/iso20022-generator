@@ -47,7 +47,7 @@ https://www.six-group.com/dam/download/banking-services/interbank-clearing/de/st
 
 |  Description | Type  | Implementation  | Local Instrument |
 |:---|:---|:---|:---|
-| ESR - orange with reference number| 1  | TransactionESR  | CH01 |
-| ES - red no reference number| 2.1  | TransactionES  | CH02 |
+| ESR - orange with reference number -> !!!!obsolete!!!!| 1  | TransactionESR  | CH01 |
+| ES - red no reference number -> !!!!obsolete!!!!| 2.1  | TransactionES  | CH02 |
 | IBAN/QRR  | 3  |  TransactionIBANandQRR | |
 | IBAN/SCOR  | 3  |  TransactionIBANandSCOR | |
