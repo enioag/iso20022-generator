@@ -85,6 +85,42 @@ namespace generator_test
             });
 
             string ret = generator.GetPain001String();
+
+            var generator2 = new Pain001Generator(new Initialization()
+            {
+                UniqueDocumentId = Guid.NewGuid().ToString().Substring(0, 34),  // Must be unique for the bank within 90 days
+                SenderPartyName = "enio AG",
+                SenderIban = "CH90 8136 1000 0338 6282 8",
+                SenderBic = "CRESCHZZ80A", //CS
+                ContactDetailsName = "enio AG",
+                ContactDetailsOther = "2.1.0",
+                AutoCalculateControlSum = true
+                // SenderBic = "ZKBKCHZZ80A" //ZKB
+            });
+
+            var p3 = generator2.AddPaymentInfo(DateTime.Now.AddDays(10), "TRA");
+
+            generator2.AddTransaction(p3, new Receiver
+                {
+                    Name = "Test Name",
+                    StreetName = "",
+                    StreetNumber = "",
+                    Zip = "70372",
+                    City = "Stuttgart",
+                    CountryCode = "DE"
+                },
+                new TransactionIBANandQRR
+                {
+                    CurrencyCode = "JPY",
+                    Amount = 1117,
+                    ReceiverIban = "CH23 0024 5245 1002 3901 K",
+                    ReferenceIdentification = "69-10",
+                    QRReferenceNumber = "36 63580 00000 00000 30060 03574",
+                    InstructionForDebtorAgent = null
+                });
+
+            string ret2 = generator2.GetPain001String();
+
             Assert.True(true);
         }
     }

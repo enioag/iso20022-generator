@@ -186,7 +186,7 @@ namespace iso20022_generator
                         }
                     };
 
-                    if (transactionIbaNandQrr.AdditionalRemittanceInformation.Length > 0)
+                    if (transactionIbaNandQrr.AdditionalRemittanceInformation?.Length > 0)
                     {
                         rmtInf.Strd.AddtlRmtInf = transactionIbaNandQrr.AdditionalRemittanceInformation;
                     }
