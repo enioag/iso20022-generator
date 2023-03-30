@@ -14,14 +14,17 @@ namespace generator_test
             var generator = new Pain001Generator(new Initialization()
             {
                 UniqueDocumentId = Guid.NewGuid().ToString().Substring(0, 34),  // Must be unique for the bank within 90 days
-                SenderPartyName = "enio AG",
-                SenderIban = "CH90 8136 1000 0338 6282 8",
-                SenderBic = "CRESCHZZ80A", //CS
                 ContactDetailsName = "enio AG",
-                ContactDetailsOther = "2.1.0",
+                ContactDetailsOther = "3.0.0",
                 AutoCalculateControlSum = true
                 // SenderBic = "ZKBKCHZZ80A" //ZKB
-            });
+            },
+                new Sender()
+                {
+                    SenderPartyName = "enio AG",
+                    SenderIban = "CH90 8136 1000 0338 6282 8",
+                    SenderBic = "CRESCHZZ80A", //CS
+                });
 
             var p1 = generator.AddPaymentInfo(DateTime.Now.AddDays(10), "TRA");
 
@@ -89,14 +92,17 @@ namespace generator_test
             var generator2 = new Pain001Generator(new Initialization()
             {
                 UniqueDocumentId = Guid.NewGuid().ToString().Substring(0, 34),  // Must be unique for the bank within 90 days
-                SenderPartyName = "enio AG",
-                SenderIban = "CH90 8136 1000 0338 6282 8",
-                SenderBic = "CRESCHZZ80A", //CS
                 ContactDetailsName = "enio AG",
-                ContactDetailsOther = "2.1.0",
+                ContactDetailsOther = "3.0.0",
                 AutoCalculateControlSum = true
                 // SenderBic = "ZKBKCHZZ80A" //ZKB
-            });
+            },
+                new Sender()
+                {
+                    SenderPartyName = "enio AG",
+                    SenderIban = "CH90 8136 1000 0338 6282 8",
+                    SenderBic = "CRESCHZZ80A", //CS
+                });
 
             var p3 = generator2.AddPaymentInfo(DateTime.Now.AddDays(10), "TRA");
 

@@ -4,37 +4,10 @@ namespace iso20022_generator.entity
 {
     public class Initialization
     {
-        private string _senderIban;
-        private string _senderBic = "";
+        
         private decimal _controlSum;
         private string _contactDetailsName = "iso20022-Generator / enio AG";
-        private string _contactDetailsOther = "2.1.0";
-
-        public string SenderPartyName { get; set; }
-
-        public string SenderIban
-        {
-            get => _senderIban;
-            set
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                    throw new ArgumentException("Sender IBAN cannot be null or whitespace.", nameof(value));
-                if (value.Length < 20)
-                    throw new ArgumentException("Sender IBAN is to short", nameof(value));
-                _senderIban = value.Replace(" ", "");
-            }
-        }
-
-        public string SenderBic
-        {
-            get => _senderBic;
-            set
-            {
-                if (value.Length > 11)
-                    throw new ArgumentException("Sender BIC is to long", nameof(value));
-                _senderBic = value;
-            }
-        }
+        private string _contactDetailsOther = "3.0.0";
 
         public decimal ControlSum
         {

@@ -26,12 +26,13 @@ namespace iso20022_generator
 
         private CustomerCreditTransferInitiationV03CH cstmrCdtTrfInitn = new CustomerCreditTransferInitiationV03CH();
         private Initialization initialization;
+        public Sender Sender { get; set; }
 
         /// <summary>
         /// Initializes a new generator which allows creating ISO20022-pain.001 files.
         /// </summary>
         /// <param name="init">Object with all the required information for setting up a new transaction document.</param>
-        public Pain001Generator(Initialization init)
+        public Pain001Generator(Initialization init, Sender sender)
         {
             initialization = init;
             doc.CstmrCdtTrfInitn = cstmrCdtTrfInitn;
@@ -49,10 +50,11 @@ namespace iso20022_generator
 
             grpHdr.InitgPty = initPty; // Index 1.8
 
-            initPty.Nm = init.SenderPartyName; // Index 1.8 - Name
+            initPty.Nm = sender.SenderPartyName; // Index 1.8 - Name
             initPty.CtctDtls = ctctDtls; // Index 1.8 - Contact Details
             ctctDtls.Nm = init.ContactDetailsName; // Index 1.8 - Contact Details.Name
             ctctDtls.Othr = init.ContactDetailsOther; // Index 1.8 - Contact Details.Other
+            Sender=sender;
         }
 
         public PaymentInstructionInformation3CH AddPaymentInfo(DateTime requiredExecutionDate, string paymentMethod = "TRA")
@@ -77,17 +79,17 @@ namespace iso20022_generator
             pmtInf.ReqdExctnDt = requiredExecutionDate; // Index 2.17
             pmtInf.Dbtr = dbtr;
 
-            dbtr.Nm = initialization.SenderPartyName;
+            dbtr.Nm = Sender.SenderPartyName;
 
             pmtInf.DbtrAcct = dbtrAcct;
             dbtrAcct.Id = dbtrAcctId;
-            dbtrAcctId.Item = initialization.SenderIban; // Index 2.20 / Id / IBAN  Bezugs-Konto
+            dbtrAcctId.Item = Sender.SenderIban; // Index 2.20 / Id / IBAN  Bezugs-Konto
 
             pmtInf.DbtrAgt = dbtrAgt;
 
             // Add BIC only if is set to guarantee the compatibility to the old version
-            if (!string.IsNullOrEmpty(initialization.SenderBic)) // Index 2.21
-                finInstnIdDbtr.BIC = initialization.SenderBic;
+            if (!string.IsNullOrEmpty(Sender.SenderBic)) // Index 2.21
+                finInstnIdDbtr.BIC = Sender.SenderBic;
 
             dbtrAgt.FinInstnId = finInstnIdDbtr;
 
