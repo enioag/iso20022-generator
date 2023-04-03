@@ -15,7 +15,7 @@ namespace generator_test
             {
                 UniqueDocumentId = Guid.NewGuid().ToString().Substring(0, 34),  // Must be unique for the bank within 90 days
                 ContactDetailsName = "enio AG",
-                ContactDetailsOther = "3.0.0",
+                ContactDetailsOther = "3.0.1",
                 AutoCalculateControlSum = true
                 // SenderBic = "ZKBKCHZZ80A" //ZKB
             },
@@ -29,14 +29,14 @@ namespace generator_test
             var p1 = generator.AddPaymentInfo(DateTime.Now.AddDays(10), "TRA");
 
             generator.AddTransaction(p1, new Receiver
-                {
-                    Name = "Max Kälin",
-                    StreetName = "Dorfstrasse",
-                    StreetNumber = "9b",
-                    Zip = "8808",
-                    City = "Pfäffikon",
-                    CountryCode = "CH"
-                },
+            {
+                Name = "Max Kälin",
+                StreetName = "Dorfstrasse",
+                StreetNumber = "9b",
+                Zip = "8808",
+                City = "Pfäffikon",
+                CountryCode = "CH"
+            },
                 new TransactionIBANandQRR
                 {
                     CurrencyCode = "CHF",
@@ -49,14 +49,14 @@ namespace generator_test
                 });
 
             generator.AddTransaction(p1, new Receiver
-                {
-                    Name = "Alpkorporation Kohlschlag",
-                    StreetName = "Kohlschlagerstrasse",
-                    StreetNumber = "2",
-                    Zip = "8887",
-                    City = "Mels",
-                    CountryCode = "CH",
-                },
+            {
+                Name = "Alpkorporation Kohlschlag",
+                StreetName = "Kohlschlagerstrasse",
+                StreetNumber = "2",
+                Zip = "8887",
+                City = "Mels",
+                CountryCode = "CH",
+            },
                 new TransactionIBANandQRR
                 {
                     CurrencyCode = "CHF",
@@ -65,7 +65,7 @@ namespace generator_test
                     ReferenceIdentification = "QRR Test",
                     QRReferenceNumber = "36 63580 00000 00000 30060 03574",
                     InstructionForDebtorAgent = "Instruction",
-                    AdditionalRemittanceInformation = new string[] {"Auftrag vom 25.10.2022"}
+                    AdditionalRemittanceInformation = new string[] { "Auftrag vom 25.10.2022" }
                 });
 
             var p2 = generator.AddPaymentInfo(DateTime.Now.AddDays(5), "TRF");
@@ -93,7 +93,7 @@ namespace generator_test
             {
                 UniqueDocumentId = Guid.NewGuid().ToString().Substring(0, 34),  // Must be unique for the bank within 90 days
                 ContactDetailsName = "enio AG",
-                ContactDetailsOther = "3.0.0",
+                ContactDetailsOther = "3.0.1",
                 AutoCalculateControlSum = true
                 // SenderBic = "ZKBKCHZZ80A" //ZKB
             },
@@ -107,14 +107,14 @@ namespace generator_test
             var p3 = generator2.AddPaymentInfo(DateTime.Now.AddDays(10), "TRA");
 
             generator2.AddTransaction(p3, new Receiver
-                {
-                    Name = "Test Name",
-                    StreetName = "",
-                    StreetNumber = "",
-                    Zip = "70372",
-                    City = "Stuttgart",
-                    CountryCode = "DE"
-                },
+            {
+                Name = "Test Name",
+                StreetName = "",
+                StreetNumber = "",
+                Zip = "70372",
+                City = "Stuttgart",
+                CountryCode = "DE"
+            },
                 new TransactionIBANandQRR
                 {
                     CurrencyCode = "JPY",
@@ -126,6 +126,90 @@ namespace generator_test
                 });
 
             string ret2 = generator2.GetPain001String();
+
+
+            var generatorph = new Pain001Generator(new Initialization()
+                {
+                    UniqueDocumentId = Guid.NewGuid().ToString().Substring(0, 34),  // Must be unique for the bank within 90 days
+                    ContactDetailsName = "enio AG",
+                    ContactDetailsOther = "3.0.1",
+                    AutoCalculateControlSum = true
+                },
+                new Sender()
+                {
+                    SenderPartyName = "Muster AG",
+                    SenderIban = "InitialWertInitialWert",
+                    SenderBic = "HHHHCH22", //HBL
+                });
+
+            generatorph.Sender.SenderIban = "CH5656565656565656565";
+            var ph = generatorph.AddPaymentInfo(DateTime.Now.AddDays(10), "TRA");
+
+            generatorph.AddTransaction(ph, new Receiver
+                {
+                    Name = "Hypo AG",
+                    StreetName = "",
+                    StreetNumber = "",
+                    Zip = "70372",
+                    City = "Stuttgart",
+                    CountryCode = "DE"
+                },
+                new TransactionIBANandQRR
+                {
+                    CurrencyCode = "CHF",
+                    Amount = 100,
+                    ReceiverIban = "CH0200202020202020202",
+                    ReferenceIdentification = "69-10",
+                    QRReferenceNumber = "36 63580 00000 00000 30060 03574",
+                    InstructionForDebtorAgent = "/Cost center/1/VAT/1/Project number/1/"
+                });
+
+            generatorph.Sender.SenderIban = "CH2929292929292929292";
+            var ph2 = generatorph.AddPaymentInfo(DateTime.Now.AddDays(10), "TRA");
+
+            generatorph.AddTransaction(ph2, new Receiver
+                {
+                    Name = "Hypo AG",
+                    StreetName = "",
+                    StreetNumber = "",
+                    Zip = "70372",
+                    City = "Stuttgart",
+                    CountryCode = "DE"
+                },
+                new TransactionIBANandQRR
+                {
+                    CurrencyCode = "CHF",
+                    Amount = 100,
+                    ReceiverIban = "CH0200202020202020202",
+                    ReferenceIdentification = "69-10",
+                    QRReferenceNumber = "36 63580 00000 00000 30060 03574",
+                    InstructionForDebtorAgent = "/Cost center/1/VAT/1/Project number/1/"
+                });
+
+            generatorph.Sender.SenderIban = "CH0200202020202020202";
+            var ph3 = generatorph.AddPaymentInfo(DateTime.Now.AddDays(10), "TRA");
+
+            generatorph.AddTransaction(ph3, new Receiver
+                {
+                    Name = "Hypo AG",
+                    StreetName = "",
+                    StreetNumber = "",
+                    Zip = "70372",
+                    City = "Stuttgart",
+                    CountryCode = "DE"
+                },
+                new TransactionIBANandQRR
+                {
+                    CurrencyCode = "CHF",
+                    Amount = 200,
+                    ReceiverIban = "CH7777777777777777777",
+                    ReferenceIdentification = "69-10",
+                    QRReferenceNumber = "36 63580 00000 00000 30060 03574",
+                    InstructionForDebtorAgent = ""
+                });
+
+            string retph = generatorph.GetPain001String();
+
 
             Assert.True(true);
         }

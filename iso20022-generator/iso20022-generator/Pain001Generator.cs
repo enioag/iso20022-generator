@@ -13,18 +13,9 @@ namespace iso20022_generator
     public class Pain001Generator
     {
         private Document doc = new Document();
-        private GroupHeader32CH grpHdr = new GroupHeader32CH(); // Index 1.0
-        private PartyIdentification32CH_NameAndId initPty = new PartyIdentification32CH_NameAndId(); // Index 1.8
-        private ContactDetails2CH ctctDtls = new ContactDetails2CH(); // Index 1.8
-        private PartyIdentification32CH dbtr = new PartyIdentification32CH(); // Index 2.19
-        private CashAccount16CH_IdTpCcy dbtrAcct = new CashAccount16CH_IdTpCcy(); // Index 2.20
-        private AccountIdentification4ChoiceCH dbtrAcctId = new AccountIdentification4ChoiceCH(); // Index 2.20 / Id
-        private BranchAndFinancialInstitutionIdentification4CH_BicOrClrId dbtrAgt = new BranchAndFinancialInstitutionIdentification4CH_BicOrClrId(); // Index 2.21
-        private FinancialInstitutionIdentification7CH_BicOrClrId finInstnIdDbtr = new FinancialInstitutionIdentification7CH_BicOrClrId(); // Index 2.21 / Financial Institution Identification
-
         private List<PaymentInstructionInformation3CH> pmtInfList = new List<PaymentInstructionInformation3CH>(); // Index 2.0
-
         private CustomerCreditTransferInitiationV03CH cstmrCdtTrfInitn = new CustomerCreditTransferInitiationV03CH();
+        private GroupHeader32CH grpHdr = new GroupHeader32CH(); // Index 1.0
         private Initialization initialization;
         public Sender Sender { get; set; }
 
@@ -35,6 +26,7 @@ namespace iso20022_generator
         public Pain001Generator(Initialization init, Sender sender)
         {
             initialization = init;
+            
             doc.CstmrCdtTrfInitn = cstmrCdtTrfInitn;
 
             // Level A
@@ -48,9 +40,11 @@ namespace iso20022_generator
                 grpHdr.CtrlSumSpecified = true;
             }
 
+            PartyIdentification32CH_NameAndId initPty = new PartyIdentification32CH_NameAndId(); // Index 1.8
             grpHdr.InitgPty = initPty; // Index 1.8
 
             initPty.Nm = sender.SenderPartyName; // Index 1.8 - Name
+            ContactDetails2CH ctctDtls = new ContactDetails2CH(); // Index 1.8
             initPty.CtctDtls = ctctDtls; // Index 1.8 - Contact Details
             ctctDtls.Nm = init.ContactDetailsName; // Index 1.8 - Contact Details.Name
             ctctDtls.Othr = init.ContactDetailsOther; // Index 1.8 - Contact Details.Other
@@ -77,19 +71,26 @@ namespace iso20022_generator
             pmtInf.BtchBookg = true; // Index 2.3
 
             pmtInf.ReqdExctnDt = requiredExecutionDate; // Index 2.17
+            PartyIdentification32CH dbtr = new PartyIdentification32CH(); // Index 2.19
             pmtInf.Dbtr = dbtr;
 
             dbtr.Nm = Sender.SenderPartyName;
 
+            CashAccount16CH_IdTpCcy dbtrAcct = new CashAccount16CH_IdTpCcy(); // Index 2.20
             pmtInf.DbtrAcct = dbtrAcct;
+            AccountIdentification4ChoiceCH dbtrAcctId = new AccountIdentification4ChoiceCH(); // Index 2.20 / Id
             dbtrAcct.Id = dbtrAcctId;
             dbtrAcctId.Item = Sender.SenderIban; // Index 2.20 / Id / IBAN  Bezugs-Konto
 
+            BranchAndFinancialInstitutionIdentification4CH_BicOrClrId dbtrAgt = new BranchAndFinancialInstitutionIdentification4CH_BicOrClrId(); // Index 2.21
             pmtInf.DbtrAgt = dbtrAgt;
 
             // Add BIC only if is set to guarantee the compatibility to the old version
+            FinancialInstitutionIdentification7CH_BicOrClrId finInstnIdDbtr = new FinancialInstitutionIdentification7CH_BicOrClrId(); // Index 2.21 / Financial Institution Identification
             if (!string.IsNullOrEmpty(Sender.SenderBic)) // Index 2.21
+            {
                 finInstnIdDbtr.BIC = Sender.SenderBic;
+            }
 
             dbtrAgt.FinInstnId = finInstnIdDbtr;
 
@@ -313,7 +314,7 @@ namespace iso20022_generator
 
         /// <summary>
         /// Allows direct access to the generated document object. This method is not thought to
-        /// be used under normal conditions however your financial institude maybe requires
+        /// be used under normal conditions however your financial institute maybe requires
         /// setting some addittional properties.
         /// </summary>
         /// <returns>Document object which will be serialized to xml</returns>

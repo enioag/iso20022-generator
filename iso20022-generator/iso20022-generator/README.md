@@ -68,8 +68,11 @@ https://www.six-group.com/dam/download/banking-services/interbank-clearing/de/st
 
 
 # Version Information
+## 3.0.1 (2023-04-03)
+- Corrected issue with unintentionally overriding of sender information
+
 ## 3.0.0 (2023-03-30) - Breaking Changes
-- Separeted Sender information from Initialzation
+- Separated Sender information from Initialzation
 - Changed Sender information to public property
 - Added README.md for nuget package and moved help documentation to this file
 
