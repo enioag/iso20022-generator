@@ -68,6 +68,11 @@ https://www.six-group.com/dam/download/banking-services/interbank-clearing/de/st
 
 
 # Version Information
+## 3.0.2 (2023-04-13)
+- Split Street and StreetNumber into two properties
+- Don't export postal adress properties if empty
+- Don't export InstructionForDebtorAgent if empty
+
 ## 3.0.1 (2023-04-03)
 - Corrected issue with unintentionally overriding of sender information
 

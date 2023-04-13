@@ -132,20 +132,33 @@ namespace iso20022_generator
                 cdtr.Nm = receiver.Name; // Index 2.79 / Name
                 if (!string.IsNullOrWhiteSpace(receiver.City))
                 {
-                    PostalAddress6CH pstlAdr = new PostalAddress6CH(); // Index 2.79 / Postal Address
+                    PostalAddress6CH pstlAdr = new PostalAddress6CH(); // Index 2.77 / Postal Address
                     cdtr.PstlAdr = pstlAdr;
-
-
-                    pstlAdr.StrtNm = receiver.StreetName; // Index 2.79 / Street Name
+                    
+                    if (!string.IsNullOrWhiteSpace(receiver.StreetName))
+                    {
+                        pstlAdr.StrtNm = receiver.StreetName; // Index 2.77 / Street Name
+                    }
 
                     if (!string.IsNullOrWhiteSpace(receiver.StreetNumber))
                     {
-                        pstlAdr.StrtNm = receiver.StreetName + " " + receiver.StreetNumber; // Index 2.79 / Building Number
+                        pstlAdr.BldgNb = receiver.StreetNumber; // Index 2.77 / Building Number
                     }
 
-                    pstlAdr.PstCd = receiver.Zip; // Index 2.79 / Post Code
-                    pstlAdr.TwnNm = receiver.City; // Index 2.79 / Town Name
-                    pstlAdr.Ctry = receiver.CountryCode; // Index 2.79 / Country
+                    if (!string.IsNullOrWhiteSpace(receiver.Zip))
+                    {
+                        pstlAdr.PstCd = receiver.Zip; // Index 2.77 / Post Code
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(receiver.City))
+                    {
+                        pstlAdr.TwnNm = receiver.City; // Index 2.77 / Town Name
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(receiver.CountryCode))
+                    {
+                        pstlAdr.Ctry = receiver.CountryCode; // Index 2.77 / Country
+                    }
                 }
             }
 
@@ -242,7 +255,10 @@ namespace iso20022_generator
                 }
             }
 
-            cdtTrfTxInf.InstrForDbtrAgt = transaction.InstructionForDebtorAgent; // Index 2.85
+            if (!string.IsNullOrWhiteSpace(transaction.InstructionForDebtorAgent))
+            {
+                cdtTrfTxInf.InstrForDbtrAgt = transaction.InstructionForDebtorAgent; // Index 2.85
+            }
 
             AddNewCreditTransferTransactionInformation(pmtInf, cdtTrfTxInf);
         }

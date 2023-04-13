@@ -7,7 +7,7 @@ namespace iso20022_generator.entity
         
         private decimal _controlSum;
         private string _contactDetailsName = "iso20022-Generator / enio AG";
-        private string _contactDetailsOther = "3.0.1";
+        private string _contactDetailsOther = "3.0.2";
 
         public decimal ControlSum
         {
