@@ -15,7 +15,7 @@ namespace generator_test
             {
                 UniqueDocumentId = Guid.NewGuid().ToString().Substring(0, 34),  // Must be unique for the bank within 90 days
                 ContactDetailsName = "enio AG",
-                ContactDetailsOther = "3.0.2",
+                ContactDetailsOther = "3.0.3",
                 AutoCalculateControlSum = true
                 // SenderBic = "ZKBKCHZZ80A" //ZKB
             },
@@ -26,7 +26,7 @@ namespace generator_test
                     SenderBic = "CRESCHZZ80A", //CS
                 });
 
-            var p1 = generator.AddPaymentInfo(DateTime.Now.AddDays(10), "TRA", batchBookSpezified:true);
+            var p1 = generator.AddPaymentInfo(DateTime.Now.AddDays(10), "TRA", batchBookingSpezified:true);
 
             generator.AddTransaction(p1, new Receiver
             {
@@ -93,7 +93,7 @@ namespace generator_test
             {
                 UniqueDocumentId = Guid.NewGuid().ToString().Substring(0, 34),  // Must be unique for the bank within 90 days
                 ContactDetailsName = "enio AG",
-                ContactDetailsOther = "3.0.2",
+                ContactDetailsOther = "3.0.3",
                 AutoCalculateControlSum = true
                 // SenderBic = "ZKBKCHZZ80A" //ZKB
             },
@@ -132,7 +132,7 @@ namespace generator_test
                 {
                     UniqueDocumentId = Guid.NewGuid().ToString().Substring(0, 34),  // Must be unique for the bank within 90 days
                     ContactDetailsName = "enio AG",
-                    ContactDetailsOther = "3.0.2",
+                    ContactDetailsOther = "3.0.3",
                     AutoCalculateControlSum = true
                 },
                 new Sender()

@@ -66,6 +66,9 @@ https://www.six-group.com/dam/download/banking-services/interbank-clearing/de/st
 | IBAN/QRR  | 3  |  TransactionIBANandQRR | |
 | IBAN/SCOR  | 3  |  TransactionIBANandSCOR | |
 
+# Version Information
+## 3.0.3 (2023-05-08)
+- added boolean value batchBookingSpezified to enable export of pmtInf.BtchBookg flag properly
 
 # Version Information
 ## 3.0.2 (2023-04-13)
