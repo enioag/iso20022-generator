@@ -26,7 +26,7 @@ namespace generator_test
                     SenderBic = "CRESCHZZ80A", //CS
                 });
 
-            var p1 = generator.AddPaymentInfo(DateTime.Now.AddDays(10), "TRA");
+            var p1 = generator.AddPaymentInfo(DateTime.Now.AddDays(10), "TRA", batchBookSpezified:true);
 
             generator.AddTransaction(p1, new Receiver
             {
@@ -50,9 +50,9 @@ namespace generator_test
 
             generator.AddTransaction(p1, new Receiver
             {
-                Name = "Alpkorporation Kohlschlag",
-                StreetName = "Kohlschlagerstrasse",
-                StreetNumber = "2",
+                Name = "Alp Alpweid",
+                StreetName = "Alpstrasse",
+                StreetNumber = "99",
                 Zip = "8887",
                 City = "Mels",
                 CountryCode = "CH",

@@ -51,7 +51,7 @@ namespace iso20022_generator
             Sender=sender;
         }
 
-        public PaymentInstructionInformation3CH AddPaymentInfo(DateTime requiredExecutionDate, string paymentMethod = "TRA")
+        public PaymentInstructionInformation3CH AddPaymentInfo(DateTime requiredExecutionDate, string paymentMethod = "TRA", bool batchBookingSpezified = false)
         {
             if (requiredExecutionDate.Date < DateTime.Now.Date)
                 throw new ArgumentException("ExecutionDate cannot be in the past");
@@ -68,6 +68,7 @@ namespace iso20022_generator
             }
 
             pmtInf.PmtMtd = pmtMtd; // Index 2.2
+            pmtInf.BtchBookgSpecified = batchBookingSpezified;
             pmtInf.BtchBookg = true; // Index 2.3
 
             pmtInf.ReqdExctnDt = requiredExecutionDate; // Index 2.17
