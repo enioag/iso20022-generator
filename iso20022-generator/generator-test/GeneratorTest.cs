@@ -15,7 +15,7 @@ namespace generator_test
             {
                 UniqueDocumentId = Guid.NewGuid().ToString().Substring(0, 34),  // Must be unique for the bank within 90 days
                 ContactDetailsName = "enio AG",
-                ContactDetailsOther = "3.0.3",
+                ContactDetailsOther = "3.0.4",
                 AutoCalculateControlSum = true
                 // SenderBic = "ZKBKCHZZ80A" //ZKB
             },
@@ -93,7 +93,7 @@ namespace generator_test
             {
                 UniqueDocumentId = Guid.NewGuid().ToString().Substring(0, 34),  // Must be unique for the bank within 90 days
                 ContactDetailsName = "enio AG",
-                ContactDetailsOther = "3.0.3",
+                ContactDetailsOther = "3.0.4",
                 AutoCalculateControlSum = true
                 // SenderBic = "ZKBKCHZZ80A" //ZKB
             },
@@ -132,7 +132,7 @@ namespace generator_test
                 {
                     UniqueDocumentId = Guid.NewGuid().ToString().Substring(0, 34),  // Must be unique for the bank within 90 days
                     ContactDetailsName = "enio AG",
-                    ContactDetailsOther = "3.0.3",
+                    ContactDetailsOther = "3.0.4",
                     AutoCalculateControlSum = true
                 },
                 new Sender()

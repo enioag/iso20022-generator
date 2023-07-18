@@ -67,6 +67,10 @@ https://www.six-group.com/dam/download/banking-services/interbank-clearing/de/st
 | IBAN/SCOR  | 3  |  TransactionIBANandSCOR | |
 
 # Version Information
+## 3.0.4 (2023-07-18)
+- added UnstructuredRemittanceInformation and AdditionalRemittanceInformation to TransactionIBANandSCOR
+
+# Version Information
 ## 3.0.3 (2023-05-08)
 - added boolean value batchBookingSpezified to enable export of pmtInf.BtchBookg flag properly
 

@@ -7,6 +7,10 @@ namespace iso20022_generator.entity.Transactions
         private string _receiverIban;
         private string _scorNumber;
 
+        public string UnstructuredRemittanceInformation { get; set; }
+
+        public string[] AdditionalRemittanceInformation { get; set; }
+
         public string ReceiverIban
         {
             get => _receiverIban;

@@ -253,6 +253,19 @@ namespace iso20022_generator
                             }
                         }
                     };
+
+                    if (transactionIbaNandSCOR.AdditionalRemittanceInformation?.Length > 0)
+                    {
+                        rmtInf.Strd.AddtlRmtInf = transactionIbaNandSCOR.AdditionalRemittanceInformation;
+                    }
+                }  else
+                {
+                    if (!string.IsNullOrWhiteSpace(transactionIbaNandSCOR.UnstructuredRemittanceInformation))
+                    {
+                        var rmtInf = new RemittanceInformation5CH();
+                        cdtTrfTxInf.RmtInf = rmtInf;
+                        rmtInf.Ustrd = transactionIbaNandSCOR.UnstructuredRemittanceInformation;
+                    }
                 }
             }
 
