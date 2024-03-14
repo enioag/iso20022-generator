@@ -67,7 +67,7 @@ https://www.six-group.com/dam/download/banking-services/interbank-clearing/de/st
 | IBAN/SCOR  | 3  |  TransactionIBANandSCOR | |
 
 # Version Information
-## 3.0.4 (2023-07-18)
+## 3.0.5 (2024-03-14)
 - changed minimum length of IBAN to 15 (Norway)
 - updated several NuGet packages
 
