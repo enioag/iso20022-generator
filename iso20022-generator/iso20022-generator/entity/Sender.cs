@@ -15,7 +15,7 @@ namespace iso20022_generator.entity
             {
                 if (string.IsNullOrWhiteSpace(value))
                     throw new ArgumentException("Sender IBAN cannot be null or whitespace.", nameof(value));
-                if (value.Length < 20)
+                if (value.Length < 15)
                     throw new ArgumentException("Sender IBAN is to short", nameof(value));
                 _senderIban = value.Replace(" ", "");
             }
