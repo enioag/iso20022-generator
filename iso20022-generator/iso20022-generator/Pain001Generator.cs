@@ -4,6 +4,7 @@ using iso20022_generator.schema;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
@@ -272,6 +273,13 @@ namespace iso20022_generator
             if (!string.IsNullOrWhiteSpace(transaction.InstructionForDebtorAgent))
             {
                 cdtTrfTxInf.InstrForDbtrAgt = transaction.InstructionForDebtorAgent; // Index 2.85
+            }
+
+            // Index 2.81 InstrForCdtrAgt -> The element may only be used in consultation with the commissioned financial institution.
+            // This element may have different characteristics and instructions depending on the financial institution.
+            if (transaction.InstructionsForCreditorAgent?.Count > 0)
+            {
+                cdtTrfTxInf.InstrForCdtrAgt = transaction.InstructionsForCreditorAgent.ToArray();
             }
 
             AddNewCreditTransferTransactionInformation(pmtInf, cdtTrfTxInf);

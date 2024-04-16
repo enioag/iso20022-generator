@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using iso20022_generator.schema;
 
 namespace iso20022_generator.entity.Transactions
 {
@@ -25,5 +27,7 @@ namespace iso20022_generator.entity.Transactions
         public virtual string PaymentType => "";
 
         public virtual string InstructionForDebtorAgent { get; set; }
+
+        public virtual List<InstructionForCreditorAgent1> InstructionsForCreditorAgent { get; set; }
     }
 }

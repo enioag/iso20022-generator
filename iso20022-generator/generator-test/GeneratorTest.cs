@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using iso20022_generator;
 using iso20022_generator.entity;
 using iso20022_generator.entity.Transactions;
+using iso20022_generator.schema;
 using Xunit;
 
 namespace generator_test
@@ -44,7 +46,19 @@ namespace generator_test
                     ReceiverIban = "CH26 0840 1016 9700 6070 6",
                     ReferenceIdentification = "Reference Id for Receiver",
                     InstructionForDebtorAgent = "Instruction",
-                    UnstructuredRemittanceInformation = "Invoice Number 4399"
+                    UnstructuredRemittanceInformation = "Invoice Number 4399",
+                    InstructionsForCreditorAgent = new List<InstructionForCreditorAgent1> {
+                        new InstructionForCreditorAgent1()
+                        {
+                            InstrInf = "Line 1 of InstructionForCreditorAgent"
+                        },
+                        new InstructionForCreditorAgent1()
+                        {
+                            Cd = Instruction3Code.CHQB,
+                            CdSpecified = true,
+                            InstrInf = "Line 2 of InstructionForCreditorAgent"
+                        }
+                    }
                     //ReceiverBIC = "MIGRCHZZXXX"
                 });
 

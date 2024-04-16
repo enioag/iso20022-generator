@@ -67,6 +67,10 @@ https://www.six-group.com/dam/download/banking-services/interbank-clearing/de/st
 | IBAN/SCOR  | 3  |  TransactionIBANandSCOR | |
 
 # Version Information
+## 3.1.0 (2024-04-16)
+- added XML tag InstrForCdtrAgt (Index 2.81). The element may only be used in consultation with the commissioned financial institution. This element may have different characteristics and instructions depending on the financial institution.
+
+# Version Information
 ## 3.0.5 (2024-03-14)
 - changed minimum length of IBAN to 15 (Norway)
 - updated several NuGet packages
