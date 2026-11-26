@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.09">
+  <CstmrCdtTrfInitn>
+    <GrpHdr>
+      <MsgId>MSG-X-20261126145101</MsgId>
+      <CreDtTm>2026-11-26T14:51:01</CreDtTm>
+      <NbOfTxs>3</NbOfTxs>
+      <CtrlSum>1380</CtrlSum>
+      <InitgPty>
+        <Nm>enio AG</Nm>
+        <CtctDtls>
+          <Othr>
+            <ChanlTp>NAME</ChanlTp>
+            <Id>iso20022-generator</Id>
+          </Othr>
+          <Othr>
+            <ChanlTp>PRVD</ChanlTp>
+            <Id>enio AG</Id>
+          </Othr>
+          <Othr>
+            <ChanlTp>VRSN</ChanlTp>
+            <Id>4.0.0</Id>
+          </Othr>
+          <Othr>
+            <ChanlTp>SPSV</ChanlTp>
+            <Id>0203</Id>
+          </Othr>
+        </CtctDtls>
+      </InitgPty>
+    </GrpHdr>
+    <PmtInf>
+      <PmtInfId>PmtInfId-1</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>3</NbOfTxs>
+      <CtrlSum>1380</CtrlSum>
+      <ReqdExctnDt>
+        <Dt>2026-11-29</Dt>
+      </ReqdExctnDt>
+      <Dbtr>
+        <Nm>enio AG</Nm>
+        <PstlAdr>
+          <StrtNm>Churerstrasse</StrtNm>
+          <BldgNb>35</BldgNb>
+          <PstCd>8808</PstCd>
+          <TwnNm>Pfäffikon SZ</TwnNm>
+          <Ctry>CH</Ctry>
+        </PstlAdr>
+      </Dbtr>
+      <DbtrAcct>
+        <Id>
+          <IBAN>CH9300762011623852957</IBAN>
+        </Id>
+      </DbtrAcct>
+      <DbtrAgt>
+        <FinInstnId>
+          <BICFI>ZKBKCHZZ80A</BICFI>
+        </FinInstnId>
+      </DbtrAgt>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>1-1</InstrId>
+          <EndToEndId>NOTPROVIDED</EndToEndId>
+          <UETR>179c957d-89ec-4626-9091-c50545d7f421</UETR>
+        </PmtId>
+        <Amt>
+          <InstdAmt Ccy="USD">1000</InstdAmt>
+        </Amt>
+        <ChrgBr>DEBT</ChrgBr>
+        <CdtrAgt>
+          <FinInstnId>
+            <ClrSysMmbId>
+              <ClrSysId>
+                <Cd>USABA</Cd>
+              </ClrSysId>
+              <MmbId>026009593</MmbId>
+            </ClrSysMmbId>
+            <Nm>Bank of America</Nm>
+            <PstlAdr>
+              <TwnNm>New York</TwnNm>
+              <Ctry>US</Ctry>
+            </PstlAdr>
+          </FinInstnId>
+        </CdtrAgt>
+        <Cdtr>
+          <Nm>John Smith</Nm>
+          <PstlAdr>
+            <StrtNm>Main Street</StrtNm>
+            <BldgNb>100</BldgNb>
+            <PstCd>10001</PstCd>
+            <TwnNm>New York</TwnNm>
+            <Ctry>US</Ctry>
+          </PstlAdr>
+        </Cdtr>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>123456789</Id>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <RmtInf>
+          <Ustrd>Invoice 123</Ustrd>
+        </RmtInf>
+      </CdtTrfTxInf>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>1-2</InstrId>
+          <EndToEndId>NOTPROVIDED</EndToEndId>
+          <UETR>97d7952e-4167-4c2e-b2be-b042cd160210</UETR>
+        </PmtId>
+        <Amt>
+          <InstdAmt Ccy="USD">300</InstdAmt>
+        </Amt>
+        <ChrgBr>SHAR</ChrgBr>
+        <CdtrAgt>
+          <FinInstnId>
+            <BICFI>COBADEFFXXX</BICFI>
+          </FinInstnId>
+        </CdtrAgt>
+        <Cdtr>
+          <Nm>Müller GmbH</Nm>
+          <PstlAdr>
+            <StrtNm>Königstrasse</StrtNm>
+            <BldgNb>1</BldgNb>
+            <PstCd>70173</PstCd>
+            <TwnNm>Stuttgart</TwnNm>
+            <Ctry>DE</Ctry>
+          </PstlAdr>
+        </Cdtr>
+        <CdtrAcct>
+          <Id>
+            <IBAN>DE89370400440532013000</IBAN>
+          </Id>
+        </CdtrAcct>
+      </CdtTrfTxInf>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>1-3</InstrId>
+          <EndToEndId>NOTPROVIDED</EndToEndId>
+          <UETR>3b2cb1f8-d945-4ea7-8239-e1251f3a2c86</UETR>
+        </PmtId>
+        <Amt>
+          <InstdAmt Ccy="GBP">80</InstdAmt>
+        </Amt>
+        <Cdtr>
+          <Nm>Max Kälin</Nm>
+          <PstlAdr>
+            <StrtNm>Dorfstrasse</StrtNm>
+            <BldgNb>9b</BldgNb>
+            <PstCd>8808</PstCd>
+            <TwnNm>Pfäffikon</TwnNm>
+            <Ctry>CH</Ctry>
+          </PstlAdr>
+        </Cdtr>
+        <CdtrAcct>
+          <Id>
+            <IBAN>CH5604835012345678009</IBAN>
+          </Id>
+        </CdtrAcct>
+      </CdtTrfTxInf>
+    </PmtInf>
+  </CstmrCdtTrfInitn>
+</Document>

@@ -1,231 +1,330 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Xml.Linq;
 using iso20022_generator;
 using iso20022_generator.entity;
 using iso20022_generator.entity.Transactions;
-using iso20022_generator.schema;
+using iso20022_generator.xml;
 using Xunit;
+using static generator_test.TestData;
 
 namespace generator_test
 {
     public class GeneratorTest
     {
+        private static readonly XNamespace Ns = SchemaValidator.Namespace;
+
         [Fact]
-        public void InitGenerator()
+        public void DomesticPayments_ProduceSchemaValidDocument()
         {
-            var generator = new Pain001Generator(new Initialization()
-            {
-                UniqueDocumentId = Guid.NewGuid().ToString().Substring(0, 34),  // Must be unique for the bank within 90 days
-                ContactDetailsName = "enio AG",
-                ContactDetailsOther = "3.0.4",
-                AutoCalculateControlSum = true
-                // SenderBic = "ZKBKCHZZ80A" //ZKB
-            },
-                new Sender()
-                {
-                    SenderPartyName = "enio AG",
-                    SenderIban = "CH90 8136 1000 0338 6282 8",
-                    SenderBic = "CRESCHZZ80A", //CS
-                });
+            var generator = Generator();
+            var p1 = generator.AddPaymentInfo(ExecutionDate, batchBookingSpezified: true);
 
-            var p1 = generator.AddPaymentInfo(DateTime.Now.AddDays(10), "TRA", batchBookingSpezified:true);
-
-            generator.AddTransaction(p1, new Receiver
-            {
-                Name = "Max Kälin",
-                StreetName = "Dorfstrasse",
-                StreetNumber = "9b",
-                Zip = "8808",
-                City = "Pfäffikon",
-                CountryCode = "CH"
-            },
-                new TransactionIBANandQRR
-                {
-                    CurrencyCode = "CHF",
-                    Amount = 100,
-                    ReceiverIban = "CH26 0840 1016 9700 6070 6",
-                    ReferenceIdentification = "Reference Id for Receiver",
-                    InstructionForDebtorAgent = "Instruction",
-                    UnstructuredRemittanceInformation = "Invoice Number 4399",
-                    InstructionsForCreditorAgent = new List<InstructionForCreditorAgent1> {
-                        new InstructionForCreditorAgent1()
-                        {
-                            InstrInf = "Line 1 of InstructionForCreditorAgent"
-                        },
-                        new InstructionForCreditorAgent1()
-                        {
-                            Cd = Instruction3Code.CHQB,
-                            CdSpecified = true,
-                            InstrInf = "Line 2 of InstructionForCreditorAgent"
-                        }
-                    }
-                    //ReceiverBIC = "MIGRCHZZXXX"
-                });
-
-            generator.AddTransaction(p1, new Receiver
-            {
-                Name = "Alp Alpweid",
-                StreetName = "Alpstrasse",
-                StreetNumber = "99",
-                Zip = "8887",
-                City = "Mels",
-                CountryCode = "CH",
-            },
-                new TransactionIBANandQRR
-                {
-                    CurrencyCode = "CHF",
-                    Amount = 100,
-                    ReceiverIban = "CH02 3080 8007 2045 5121 8",
-                    ReferenceIdentification = "QRR Test",
-                    QRReferenceNumber = "36 63580 00000 00000 30060 03574",
-                    InstructionForDebtorAgent = "Instruction",
-                    AdditionalRemittanceInformation = new string[] { "Auftrag vom 25.10.2022" }
-                });
-
-            var p2 = generator.AddPaymentInfo(DateTime.Now.AddDays(5), "TRF");
-            generator.AddTransaction(p2, new Receiver
-            {
-                Name = "Marco Birchler",
-                StreetName = "Hauptstrasse",
-                StreetNumber = "13",
-                Zip = "8840",
-                City = "Einsiedelnäöü",
-                CountryCode = "CH"
-            },
-            new TransactionIBANandQRR
+            generator.AddTransaction(p1, SwissReceiver(), new TransactionIBANandQRR
             {
                 CurrencyCode = "CHF",
-                Amount = 100,
-                ReceiverIban = "CH23 0024 5245 1002 3901 K",
-                ReferenceIdentification = "Reference Id for Receiver",
-                InstructionForDebtorAgent = "Instruction"
+                Amount = 100.50m,
+                ReceiverIban = QrIban,
+                ReferenceIdentification = "QRR Test",
+                QRReferenceNumber = QrReference,
+                AdditionalRemittanceInformation = new[] { "Auftrag vom 25.10.2026" }
+            });
+            generator.AddTransaction(p1, SwissReceiver(), new TransactionIBANandSCOR
+            {
+                CurrencyCode = "CHF",
+                Amount = 20,
+                ReceiverIban = DomesticIban,
+                ReferenceIdentification = "SCOR Test",
+                StructuredCustomerReference = CreditorReference
+            });
+            generator.AddTransaction(p1, SwissReceiver(), new TransactionIBAN
+            {
+                CurrencyCode = "EUR",
+                Amount = 30,
+                ReceiverIban = DomesticIban,
+                ReferenceIdentification = "IBAN Test",
+                UnstructuredRemittanceInformation = "Rechnung 4399",
+                InstructionForDebtorAgent = "Kostenstelle 1"
             });
 
-            string ret = generator.GetPain001String();
+            var doc = generator.GetXDocument();
 
-            var generator2 = new Pain001Generator(new Initialization()
+            Assert.Empty(SchemaValidator.Validate(doc));
+            Assert.Equal("3", doc.Descendants(Ns + "GrpHdr").Single().Element(Ns + "NbOfTxs").Value);
+            Assert.Equal("150.5", doc.Descendants(Ns + "GrpHdr").Single().Element(Ns + "CtrlSum").Value);
+            Assert.Equal(ExecutionDate.ToString("yyyy-MM-dd"), doc.Descendants(Ns + "ReqdExctnDt").Single().Element(Ns + "Dt").Value);
+            Assert.Equal("ZKBKCHZZ80A", doc.Descendants(Ns + "DbtrAgt").Single().Descendants(Ns + "BICFI").Single().Value);
+            Assert.Equal("QRR", doc.Descendants(Ns + "Prtry").First().Value);
+            Assert.Equal("SCOR", doc.Descendants(Ns + "CdOrPrtry").Last().Element(Ns + "Cd").Value);
+            Assert.All(doc.Descendants(Ns + "UETR"), u => Assert.True(Guid.TryParse(u.Value, out _)));
+            Assert.Equal(3, doc.Descendants(Ns + "UETR").Count());
+            Assert.Equal(new[] { "1-1", "1-2", "1-3" }, doc.Descendants(Ns + "InstrId").Select(e => e.Value));
+            Assert.Equal(PaymentType.Domestic, generator.GetPaymentType(p1, new TransactionIBAN { CurrencyCode = "CHF", ReceiverIban = DomesticIban }));
+        }
+
+        [Fact]
+        public void SoftwareInformation_IsWrittenAsContactDetails()
+        {
+            var generator = Generator();
+            var p = generator.AddPaymentInfo(ExecutionDate);
+            generator.AddTransaction(p, SwissReceiver(), new TransactionIBAN { CurrencyCode = "CHF", Amount = 1, ReceiverIban = DomesticIban });
+
+            var others = generator.GetXDocument().Descendants(Ns + "CtctDtls").Single().Elements(Ns + "Othr")
+                .ToDictionary(o => o.Element(Ns + "ChanlTp").Value, o => o.Element(Ns + "Id").Value);
+
+            Assert.Equal("iso20022-generator", others["NAME"]);
+            Assert.Equal("enio AG", others["PRVD"]);
+            Assert.Equal("4.0.0", others["VRSN"]);
+            Assert.Equal("0203", others["SPSV"]);
+        }
+
+        [Fact]
+        public void DebtorAgent_UsesIidFromIban_WhenNoBic()
+        {
+            var sender = Sender();
+            sender.SenderBic = "";
+            var generator = new Pain001Generator(Init(), sender);
+            var p = generator.AddPaymentInfo(ExecutionDate);
+            generator.AddTransaction(p, SwissReceiver(), new TransactionIBAN { CurrencyCode = "CHF", Amount = 1, ReceiverIban = DomesticIban });
+
+            var agent = generator.GetXDocument().Descendants(Ns + "DbtrAgt").Single();
+
+            Assert.Equal("CHBCC", agent.Descendants(Ns + "Cd").Single().Value);
+            Assert.Equal("762", agent.Descendants(Ns + "MmbId").Single().Value);
+        }
+
+        [Fact]
+        public void InstantPayment_SetsLocalInstrument()
+        {
+            var generator = Generator();
+            var p = generator.AddInstantPaymentInfo(ExecutionDate);
+            generator.AddTransaction(p, SwissReceiver(), new TransactionIBAN
             {
-                UniqueDocumentId = Guid.NewGuid().ToString().Substring(0, 34),  // Must be unique for the bank within 90 days
-                ContactDetailsName = "enio AG",
-                ContactDetailsOther = "3.0.4",
-                AutoCalculateControlSum = true
-                // SenderBic = "ZKBKCHZZ80A" //ZKB
-            },
-                new Sender()
-                {
-                    SenderPartyName = "enio AG",
-                    SenderIban = "CH90 8136 1000 0338 6282 8",
-                    SenderBic = "CRESCHZZ80A", //CS
-                });
+                CurrencyCode = "CHF",
+                Amount = 99.95m,
+                ReceiverIban = DomesticIban,
+                UnstructuredRemittanceInformation = "Sofort"
+            });
 
-            var p3 = generator2.AddPaymentInfo(DateTime.Now.AddDays(10), "TRA");
+            var doc = generator.GetXDocument();
 
-            generator2.AddTransaction(p3, new Receiver
+            Assert.Equal("INST", doc.Descendants(Ns + "LclInstrm").Single().Element(Ns + "Cd").Value);
+            Assert.Equal(PaymentType.DomesticInstant, generator.GetPaymentType(p, new TransactionIBAN { CurrencyCode = "CHF", ReceiverIban = DomesticIban }));
+        }
+
+        [Fact]
+        public void InstantPayment_InEur_IsRejected()
+        {
+            var generator = Generator();
+            var p = generator.AddInstantPaymentInfo(ExecutionDate);
+
+            Assert.Throws<ArgumentException>(() => generator.AddTransaction(p, SwissReceiver(),
+                new TransactionIBAN { CurrencyCode = "EUR", Amount = 1, ReceiverIban = DomesticIban }));
+        }
+
+        [Fact]
+        public void SepaPayment_ProducesSchemaValidDocument_WithoutUetr()
+        {
+            var generator = Generator();
+            var p = generator.AddSepaPaymentInfo(ExecutionDate);
+            p.ChargeBearer = ChargeBearer.SLEV;
+            generator.AddTransaction(p, GermanReceiver(), new TransactionIBANandSCOR
             {
-                Name = "Test Name",
-                StreetName = "",
-                StreetNumber = "",
-                Zip = "70372",
-                City = "Stuttgart",
-                CountryCode = "DE"
-            },
-                new TransactionIBANandQRR
+                CurrencyCode = "EUR",
+                Amount = 1250,
+                ReceiverIban = GermanIban,
+                ReferenceIdentification = "SEPA-1",
+                StructuredCustomerReference = CreditorReference
+            });
+
+            var doc = generator.GetXDocument();
+
+            Assert.Equal("SEPA", doc.Descendants(Ns + "SvcLvl").Single().Element(Ns + "Cd").Value);
+            Assert.Equal("SLEV", doc.Descendants(Ns + "ChrgBr").Single().Value);
+            Assert.Empty(doc.Descendants(Ns + "UETR"));
+        }
+
+        [Fact]
+        public void SepaPayment_RejectsWrongCurrencyChargeBearerAndLongName()
+        {
+            var generator = Generator();
+            var p = generator.AddSepaPaymentInfo(ExecutionDate);
+
+            Assert.Throws<ArgumentException>(() => generator.AddTransaction(p, GermanReceiver(),
+                new TransactionIBAN { CurrencyCode = "CHF", Amount = 1, ReceiverIban = GermanIban }));
+            Assert.Throws<ArgumentException>(() => generator.AddTransaction(p, GermanReceiver(),
+                new TransactionIBAN { CurrencyCode = "EUR", Amount = 1, ReceiverIban = GermanIban, ChargeBearer = ChargeBearer.DEBT }));
+
+            var longName = GermanReceiver();
+            longName.Name = new string('A', 71);
+            Assert.Throws<ArgumentException>(() => generator.AddTransaction(p, longName,
+                new TransactionIBAN { CurrencyCode = "EUR", Amount = 1, ReceiverIban = GermanIban }));
+        }
+
+        [Fact]
+        public void ForeignPayment_WithIbanAndBic()
+        {
+            var generator = Generator();
+            var p = generator.AddPaymentInfo(ExecutionDate);
+            var tx = new TransactionForeign
+            {
+                CurrencyCode = "USD",
+                Amount = 500,
+                ReceiverIban = GermanIban,
+                ReceiverBIC = "COBADEFFXXX",
+                ChargeBearer = ChargeBearer.SHAR,
+                UnstructuredRemittanceInformation = "Invoice 77",
+                InstructionsForCreditorAgent = new List<InstructionForCreditorAgent>
                 {
-                    CurrencyCode = "JPY",
-                    Amount = 1117,
-                    ReceiverIban = "CH23 0024 5245 1002 3901 K",
-                    ReferenceIdentification = "69-10",
-                    QRReferenceNumber = "36 63580 00000 00000 30060 03574",
-                    InstructionForDebtorAgent = null
-                });
+                    new InstructionForCreditorAgent { Code = "PHOB", Information = "+49 711 000000" }
+                }
+            };
+            generator.AddTransaction(p, GermanReceiver(), tx);
 
-            string ret2 = generator2.GetPain001String();
+            var doc = generator.GetXDocument();
 
+            Assert.Equal(PaymentType.Foreign, generator.GetPaymentType(p, tx));
+            Assert.Equal("COBADEFFXXX", doc.Descendants(Ns + "CdtrAgt").Single().Descendants(Ns + "BICFI").Single().Value);
+            Assert.Equal("PHOB", doc.Descendants(Ns + "InstrForCdtrAgt").Single().Element(Ns + "Cd").Value);
+        }
 
-            var generatorph = new Pain001Generator(new Initialization()
-                {
-                    UniqueDocumentId = Guid.NewGuid().ToString().Substring(0, 34),  // Must be unique for the bank within 90 days
-                    ContactDetailsName = "enio AG",
-                    ContactDetailsOther = "3.0.4",
-                    AutoCalculateControlSum = true
-                },
-                new Sender()
-                {
-                    SenderPartyName = "Muster AG",
-                    SenderIban = "InitialWertInitialWert",
-                    SenderBic = "HHHHCH22", //HBL
-                });
+        [Fact]
+        public void ForeignPayment_WithAccountNumberAndClearingCode()
+        {
+            var generator = Generator();
+            var p = generator.AddPaymentInfo(ExecutionDate);
+            generator.AddTransaction(p, new Receiver
+            {
+                Name = "John Smith",
+                StreetName = "Main Street",
+                StreetNumber = "100",
+                Zip = "10001",
+                City = "New York",
+                CountryCode = "US",
+                AddressLines = new List<string> { "Suite 5" }
+            }, new TransactionForeign
+            {
+                CurrencyCode = "USD",
+                Amount = 1000,
+                ReceiverAccountNumber = "123456789",
+                ReceiverBankClearingSystemCode = "USABA",
+                ReceiverBankClearingMemberId = "026009593",
+                ReceiverBankName = "Bank of America",
+                ReceiverBankAddress = new PostalAddress { TownName = "New York", CountryCode = "US" },
+                ChargeBearer = ChargeBearer.DEBT
+            });
 
-            generatorph.Sender.SenderIban = "CH5656565656565656565";
-            var ph = generatorph.AddPaymentInfo(DateTime.Now.AddDays(10), "TRA");
+            var doc = generator.GetXDocument();
 
-            generatorph.AddTransaction(ph, new Receiver
-                {
-                    Name = "Hypo AG",
-                    StreetName = "",
-                    StreetNumber = "",
-                    Zip = "70372",
-                    City = "Stuttgart",
-                    CountryCode = "DE"
-                },
-                new TransactionIBANandQRR
-                {
-                    CurrencyCode = "CHF",
-                    Amount = 100,
-                    ReceiverIban = "CH0200202020202020202",
-                    ReferenceIdentification = "69-10",
-                    QRReferenceNumber = "36 63580 00000 00000 30060 03574",
-                    InstructionForDebtorAgent = "/Cost center/1/VAT/1/Project number/1/"
-                });
+            Assert.Equal("123456789", doc.Descendants(Ns + "CdtrAcct").Single().Descendants(Ns + "Id").Last().Value);
+            Assert.Equal("Suite 5", doc.Descendants(Ns + "AdrLine").Single().Value);
+            Assert.Equal("USABA", doc.Descendants(Ns + "CdtrAgt").Single().Descendants(Ns + "Cd").Single().Value);
+        }
 
-            generatorph.Sender.SenderIban = "CH2929292929292929292";
-            var ph2 = generatorph.AddPaymentInfo(DateTime.Now.AddDays(10), "TRA");
+        [Fact]
+        public void ForeignPayment_AccountNumberWithoutAgent_IsRejected()
+        {
+            var generator = Generator();
+            var p = generator.AddPaymentInfo(ExecutionDate);
 
-            generatorph.AddTransaction(ph2, new Receiver
-                {
-                    Name = "Hypo AG",
-                    StreetName = "",
-                    StreetNumber = "",
-                    Zip = "70372",
-                    City = "Stuttgart",
-                    CountryCode = "DE"
-                },
-                new TransactionIBANandQRR
-                {
-                    CurrencyCode = "CHF",
-                    Amount = 100,
-                    ReceiverIban = "CH0200202020202020202",
-                    ReferenceIdentification = "69-10",
-                    QRReferenceNumber = "36 63580 00000 00000 30060 03574",
-                    InstructionForDebtorAgent = "/Cost center/1/VAT/1/Project number/1/"
-                });
+            Assert.Throws<ArgumentException>(() => generator.AddTransaction(p, GermanReceiver(),
+                new TransactionForeign { CurrencyCode = "USD", Amount = 1, ReceiverAccountNumber = "4711" }));
+        }
 
-            generatorph.Sender.SenderIban = "CH0200202020202020202";
-            var ph3 = generatorph.AddPaymentInfo(DateTime.Now.AddDays(10), "TRA");
+        [Fact]
+        public void EurToGermany_WithoutSepaServiceLevel_IsForeign()
+        {
+            var generator = Generator();
+            var p = generator.AddPaymentInfo(ExecutionDate);
 
-            generatorph.AddTransaction(ph3, new Receiver
-                {
-                    Name = "Hypo AG",
-                    StreetName = "",
-                    StreetNumber = "",
-                    Zip = "70372",
-                    City = "Stuttgart",
-                    CountryCode = "DE"
-                },
-                new TransactionIBANandQRR
-                {
-                    CurrencyCode = "CHF",
-                    Amount = 200,
-                    ReceiverIban = "CH7777777777777777777",
-                    ReferenceIdentification = "69-10",
-                    QRReferenceNumber = "36 63580 00000 00000 30060 03574",
-                    InstructionForDebtorAgent = ""
-                });
+            Assert.Equal(PaymentType.Foreign, generator.GetPaymentType(p, new TransactionIBAN { CurrencyCode = "EUR", ReceiverIban = GermanIban }));
+        }
 
-            string retph = generatorph.GetPain001String();
+        [Fact]
+        public void DomesticEur_CanBeTreatedAsForeign_AfterEuroSicDiscontinuation()
+        {
+            var init = Init();
+            init.TreatDomesticEurAsForeign = true;
+            var generator = new Pain001Generator(init, Sender());
+            var p = generator.AddPaymentInfo(ExecutionDate);
 
+            Assert.Equal(PaymentType.Foreign, generator.GetPaymentType(p, new TransactionIBAN { CurrencyCode = "EUR", ReceiverIban = DomesticIban }));
+        }
 
-            Assert.True(true);
+        [Fact]
+        public void SavePain001ToDirectory_WritesUtf8WithoutBom()
+        {
+            var generator = Generator();
+            var p = generator.AddPaymentInfo(ExecutionDate);
+            generator.AddTransaction(p, SwissReceiver(), new TransactionIBAN { CurrencyCode = "CHF", Amount = 1, ReceiverIban = DomesticIban });
+            var file = Path.Combine(Path.GetTempPath(), $"pain001-{Guid.NewGuid():N}.xml");
+
+            try
+            {
+                generator.SavePain001ToDirectory(file);
+                var bytes = File.ReadAllBytes(file);
+
+                Assert.NotEqual(0xEF, bytes[0]);
+                Assert.Empty(SchemaValidator.Validate(XDocument.Load(file)));
+                Assert.Contains("Max KÃ¤lin", File.ReadAllText(file));
+            }
+            finally
+            {
+                File.Delete(file);
+            }
+        }
+
+        [Fact]
+        public void GetPain001String_StartsWithUtf8Declaration()
+        {
+            var generator = Generator();
+            var p = generator.AddPaymentInfo(ExecutionDate);
+            generator.AddTransaction(p, SwissReceiver(), new TransactionIBAN { CurrencyCode = "CHF", Amount = 1, ReceiverIban = DomesticIban });
+
+            var xml = generator.GetPain001String();
+
+            Assert.StartsWith("<?xml version=\"1.0\" encoding=\"utf-8\"?>", xml, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("urn:iso:std:iso:20022:tech:xsd:pain.001.001.09", xml);
+        }
+
+        [Fact]
+        public void LegacyPaymentMethodTra_IsMappedToTrf()
+        {
+            var generator = Generator();
+            var p = generator.AddPaymentInfo(ExecutionDate, "TRA");
+            generator.AddTransaction(p, SwissReceiver(), new TransactionIBAN { CurrencyCode = "CHF", Amount = 1, ReceiverIban = DomesticIban });
+
+            Assert.Equal("TRF", generator.GetXDocument().Descendants(Ns + "PmtMtd").Single().Value);
+            Assert.Throws<ArgumentException>(() => generator.AddPaymentInfo(ExecutionDate, "CHK"));
+        }
+
+        [Fact]
+        public void SchemaValidator_DetectsInvalidDocument()
+        {
+            var generator = Generator();
+            var p = generator.AddPaymentInfo(ExecutionDate);
+            generator.AddTransaction(p, SwissReceiver(), new TransactionIBAN { CurrencyCode = "CHF", Amount = 1, ReceiverIban = DomesticIban });
+            var invalidCharacters = generator.GetXDocument();
+            invalidCharacters.Descendants(Ns + "Cdtr").Single().Element(Ns + "Nm").Value = "Emoji ðŸ˜€";
+            var missingElement = generator.GetXDocument();
+            missingElement.Descendants(Ns + "ReqdExctnDt").Single().Remove();
+
+            Assert.Contains("Pattern constraint", Assert.Single(SchemaValidator.Validate(invalidCharacters)));
+            Assert.Contains("ReqdExctnDt", Assert.Single(SchemaValidator.Validate(missingElement)));
+        }
+
+        [Fact]
+        public void EmptyDocument_Throws()
+        {
+            Assert.Throws<InvalidOperationException>(() => Generator().GetPain001String());
+        }
+
+        [Fact]
+        public void ExecutionDateInPast_Throws()
+        {
+            Assert.Throws<ArgumentException>(() => Generator().AddPaymentInfo(DateTime.Today.AddDays(-1)));
         }
     }
 }
