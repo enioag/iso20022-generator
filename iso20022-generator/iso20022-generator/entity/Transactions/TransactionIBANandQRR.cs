@@ -1,35 +1,36 @@
 ﻿using System;
+using iso20022_generator.validation;
 
 namespace iso20022_generator.entity.Transactions
 {
-    public class TransactionIBANandQRR : TransactionBase
+    /// <summary>
+    /// QR-bill payment with QR reference (QRR). The QR reference requires a QR-IBAN and vice versa.
+    /// If no QR reference is set, the transaction behaves like <see cref="TransactionIBAN"/> (3.x compatibility).
+    /// </summary>
+    public class TransactionIBANandQRR : TransactionIBAN
     {
-        private string _receiverIban;
-        private string _qRRReferenceNumber;
+        private string _qrReferenceNumber;
 
-        public string ReceiverIban
+        /// <summary>27 digit QR reference with modulo 10 check digit. Spaces are removed.</summary>
+        public string QRReferenceNumber
         {
-            get => _receiverIban;
+            get => _qrReferenceNumber;
             set
             {
-                if (string.IsNullOrWhiteSpace(value))
-                    throw new ArgumentException("IBAN cannot be null or whitespace.", nameof(value));
-                if (value.Length < 15)
-                    throw new ArgumentException("IBAN is to short", nameof(value));
-                _receiverIban = value.Replace(" ", "");
+                var reference = Checks.Compact(value);
+                if (!string.IsNullOrEmpty(reference) && !Checks.IsValidQrReference(reference))
+                    throw new ArgumentException($"QR reference '{value}' is not valid (27 digits, modulo 10 check digit)", nameof(value));
+                _qrReferenceNumber = string.IsNullOrEmpty(reference) ? null : reference;
             }
         }
 
-        public string ReceiverBIC { get; set; }
-
-        public string QRReferenceNumber
-        {
-            get => _qRRReferenceNumber;
-            set => _qRRReferenceNumber = value.Replace(" ", "");
-        }
-
-        public string UnstructuredRemittanceInformation { get; set; }
-
+        /// <summary>Additional remittance information (AddtlRmtInf), only together with a QR reference.
+        /// Domestic: max. 1 entry with 140 characters.</summary>
         public string[] AdditionalRemittanceInformation { get; set; }
+
+        internal override (string Reference, string Type)? CreditorReference =>
+            QRReferenceNumber == null ? ((string, string)?)null : (QRReferenceNumber, "QRR");
+
+        internal override string[] AdditionalRemittanceInfo => AdditionalRemittanceInformation;
     }
 }

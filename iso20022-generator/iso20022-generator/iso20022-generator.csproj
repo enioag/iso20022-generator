@@ -2,39 +2,36 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
     <RootNamespace>iso20022_generator</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
     <Company>enio AG</Company>
     <Authors>Marco Birchler, Thomas Kohler</Authors>
     <PackageProjectUrl>https://github.com/enioag/iso20022-generator</PackageProjectUrl>
-    <PackageLicenseUrl></PackageLicenseUrl>
     <PackageId>iso20022Generator</PackageId>
     <Product>iso20022Generator</Product>
-    <Version>3.1.0</Version>
+    <Version>4.0.0</Version>
     <Copyright>enio AG</Copyright>
-    <Description>This generator library helps you building iso 20022 artifacts with the minimum amount of information you need to set up valid documents. Currently pain.001 files are only supported.</Description>
-    <AssemblyVersion>3.1.0.0</AssemblyVersion>
-    <FileVersion>3.1.0.0</FileVersion>
+    <Description>Generates Swiss ISO 20022 credit transfer files (pain.001.001.09.ch.03) according to the Swiss Payment Standards 2026 (Implementation Guidelines v2.3). Supports domestic (QR reference, SCOR, IBAN), instant, SEPA and foreign currency / cross-border payments. Every generated file is validated against the official SIX XML schema.</Description>
+    <PackageTags>iso20022;pain.001;sps;swiss-payment-standards;qr-bill;sepa</PackageTags>
+    <AssemblyVersion>4.0.0.0</AssemblyVersion>
+    <FileVersion>4.0.0.0</FileVersion>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
-	  <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NuGet.CommandLine" Version="6.9.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <EmbeddedResource Include="schema\pain.001.001.09.ch.03.xsd" LogicalName="iso20022_generator.schema.pain.001.001.09.ch.03.xsd" />
   </ItemGroup>
 
-    <ItemGroup>
-	    <None Include="README.md" Pack="true" PackagePath="\" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Update="LICENSE.md">
-        <Pack>True</Pack>
-        <PackagePath>\</PackagePath>
-      </None>
-    </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Update="LICENSE.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>
