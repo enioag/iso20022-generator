@@ -12,7 +12,7 @@
     <PackageProjectUrl>https://github.com/enioag/iso20022-generator</PackageProjectUrl>
     <PackageId>iso20022Generator</PackageId>
     <Product>iso20022Generator</Product>
-    <Version>4.0.0</Version>
+    <Version>4.0.0-beta.1</Version>
     <Copyright>enio AG</Copyright>
     <Description>Generates Swiss ISO 20022 credit transfer files (pain.001.001.09.ch.03) according to the Swiss Payment Standards 2026 (Implementation Guidelines v2.3). Supports domestic (QR reference, SCOR, IBAN), instant, SEPA and foreign currency / cross-border payments. Every generated file is validated against the official SIX XML schema.</Description>
     <PackageTags>iso20022;pain.001;sps;swiss-payment-standards;qr-bill;sepa</PackageTags>

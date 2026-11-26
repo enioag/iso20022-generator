@@ -123,7 +123,7 @@ The library was built for Swiss banks. Version 3.x was tested against the test e
 
 # Version Information
 
-## 4.0.0 (2026-11-26) - Breaking Changes
+## 4.0.0-beta.1 (2026-11-26) - Breaking Changes, Beta
 - New message format `pain.001.001.09.ch.03` (SPS 2026, IG v2.3). `pain.001.001.03.ch.02` was removed.
 - XML is generated with LINQ to XML and validated against the embedded SIX schema. The generated XmlSerializer classes were removed, and `getDocumentObject()` was replaced by `GetXDocument()`.
 - New: payment types S (`AddSepaPaymentInfo`), X (`TransactionForeign`) and D V2 instant (`AddInstantPaymentInfo`)
